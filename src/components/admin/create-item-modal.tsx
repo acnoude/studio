@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase/client";
 
 import {
   Dialog,
@@ -41,12 +39,11 @@ const formSchema = z.object({
   description: z.string().min(1, "Description is required"),
   startingBid: z.coerce.number().min(0, "Starting bid must be non-negative"),
   minIncrement: z.coerce.number().positive("Minimum increment must be a positive number"),
-  image: z.any().refine((files) => files?.length === 1, "Image is required."),
+  imageUrl: z.string().url("A valid image URL is required"),
 });
 
 export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) {
   const [state, formAction, isPending] = useActionState(createItem, null);
-  const [imageUploadLoading, setImageUploadLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,36 +53,19 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
       description: "",
       startingBid: 10,
       minIncrement: 1,
+      imageUrl: "",
     },
   });
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    setImageUploadLoading(true);
-    try {
-      const file = values.image[0];
-      const storageRef = ref(storage, `items/${Date.now()}_${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-
-      const formData = new FormData();
-      formData.append("name", values.name);
-      formData.append("description", values.description);
-      formData.append("startingBid", values.startingBid.toString());
-      formData.append("minIncrement", values.minIncrement.toString());
-      formData.append("imageUrl", downloadURL);
-      
-      formAction(formData);
-
-    } catch (error) {
-      console.error("Image upload or form action failed:", error);
-      let message = "An unexpected error occurred.";
-      if (error instanceof Error) {
-        message = error.message;
-      }
-      toast({ title: "Error", description: message, variant: "destructive" });
-    } finally {
-      setImageUploadLoading(false);
-    }
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("description", values.description);
+    formData.append("startingBid", values.startingBid.toString());
+    formData.append("minIncrement", values.minIncrement.toString());
+    formData.append("imageUrl", values.imageUrl);
+    
+    formAction(formData);
   };
   
   useEffect(() => {
@@ -105,8 +85,6 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
-
-  const loading = isPending || imageUploadLoading;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -184,16 +162,15 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
             </div>
             <FormField
               control={form.control}
-              name="image"
-              render={({ field: { onChange, value, ...rest } }) => (
+              name="imageUrl"
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Item Image</FormLabel>
+                  <FormLabel>Item Image URL</FormLabel>
                   <FormControl>
                     <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => onChange(e.target.files)}
-                      {...rest}
+                      type="url"
+                      placeholder="https://example.com/image.jpg"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -201,8 +178,8 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+              <Button type="submit" disabled={isPending} className="w-full">
+                {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
                 Create Item
               </Button>
             </DialogFooter>
