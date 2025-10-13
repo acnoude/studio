@@ -3,10 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /items/{itemId} {
-      // Allow anyone to view the auction items
-      allow get, list: if true;
-      
-      // Only allow authenticated users (admins) to create, update, or delete items
+      allow read: if true;
       allow create, update, delete: if request.auth != null;
     }
   }
