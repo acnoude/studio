@@ -34,8 +34,8 @@ export function AdminItemsTable() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const { toast } = useToast();
 
-  const handleStatusToggle = async (id: string, currentStatus: boolean) => {
-    const result = await toggleItemStatus(id, !currentStatus);
+  const handleStatusToggle = async (id: string, newStatus: boolean) => {
+    const result = await toggleItemStatus(id, newStatus);
     if (result.status === "success") {
       toast({ title: "Success", description: result.message });
     } else {
@@ -113,8 +113,8 @@ export function AdminItemsTable() {
         <div className="flex items-center gap-2">
           <Switch
             checked={row.getValue("active")}
-            onCheckedChange={(currentStatus) =>
-              handleStatusToggle(row.original.id, currentStatus)
+            onCheckedChange={(newStatus) =>
+              handleStatusToggle(row.original.id, newStatus)
             }
             aria-label="Toggle item status"
           />
