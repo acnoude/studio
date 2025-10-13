@@ -1,6 +1,6 @@
 import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, type ServiceAccount } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
-import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
+import { getFirestore as getAdminFirestore, FieldValue } from "firebase-admin/firestore";
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
 import "server-only";
 
@@ -46,4 +46,4 @@ if (getAdminApps().length === 0) {
 const adminAuth = getAdminAuth(adminApp);
 const adminStorage = getAdminStorage(adminApp);
 
-export { adminApp, adminAuth, adminDb, adminStorage };
+export { adminApp, adminAuth, adminDb, adminStorage, FieldValue };
