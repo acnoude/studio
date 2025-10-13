@@ -75,14 +75,17 @@ Our architecture provides excellent performance metrics, ensuring a smooth user 
 
 ## Slide 7: Cost Analysis - Efficient & Predictable
 
-**Current Operational Cost: ~$0**
+**Current Operational Cost: Effectively ~$0**
 
-The application currently operates entirely within the generous **Firebase "Spark" free tier**, which includes:
-*   **Firestore:** 1 GiB storage, 50k reads/day, 20k writes/day.
-*   **Firebase Hosting:** 10 GB storage, 360 MB/day egress.
-*   **Authentication:** 10,000 authentications/month.
+The application runs on the **Firebase "Blaze" (pay-as-you-go) plan**, which is required for the advanced App Hosting service.
 
-This makes it perfect for small to medium-sized events at no infrastructure cost.
+However, the Blaze plan **includes the same generous free tier as the Spark plan**. This means for typical usage during development and for most events, the costs will be at or very near zero. You only pay for what you use beyond the free allowance.
+
+*   **Firestore:** Free tier includes 1 GiB storage, 50k reads/day, 20k writes/day.
+*   **App Hosting:** Includes a generous free tier for CPU, memory, and data egress.
+*   **Authentication:** Free tier includes 10,000 authentications/month.
+
+This model gives you the power of a fully scalable backend with no upfront cost.
 
 ---
 
@@ -91,7 +94,7 @@ This makes it perfect for small to medium-sized events at no infrastructure cost
 The platform is built to grow with your needs, from local fundraisers to large-scale national galas.
 
 **Scaling the Platform:**
-Transitioning to the **Firebase "Blaze" (pay-as-you-go) plan** allows for massive scale. Costs remain low and are based purely on usage.
+Since the app is already on the **"Blaze" (pay-as-you-go) plan**, it scales automatically. Costs remain low and are based purely on usage.
 *   **Example Scenario (Large Gala - 2,000 users, 200 items):**
     *   **Firestore Reads/Writes:** ~$3-5
     *   **Data Storage (Images):** ~$5-10
@@ -114,4 +117,3 @@ The application can be easily deployed to a custom domain (e.g., `auction.yourco
 *   **Modern Experience:** Engages donors and simplifies management.
 
 **Let's elevate our next fundraising event with SilentBid.**
-
