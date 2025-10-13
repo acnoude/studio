@@ -5,6 +5,7 @@ import { getStorage as getAdminStorage } from "firebase-admin/storage";
 import "server-only";
 
 let adminApp;
+let adminDb: ReturnType<typeof getAdminFirestore>;
 
 if (getAdminApps().length === 0) {
   if (process.env.NODE_ENV === 'production') {
@@ -34,14 +35,15 @@ if (getAdminApps().length === 0) {
         });
     }
   }
+  adminDb = getAdminFirestore(adminApp);
+  adminDb.settings({ databaseId: 'hhsilentbid' });
 } else {
   adminApp = getAdminApp();
+  adminDb = getAdminFirestore(adminApp);
 }
 
 
 const adminAuth = getAdminAuth(adminApp);
-const adminDb = getAdminFirestore(adminApp);
-adminDb.settings({ databaseId: 'hhsilentbid' });
 const adminStorage = getAdminStorage(adminApp);
 
 export { adminApp, adminAuth, adminDb, adminStorage };
