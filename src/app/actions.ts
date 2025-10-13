@@ -5,7 +5,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/server";
-import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
+// import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
 
 const bidSchema = z.object({
@@ -48,21 +48,21 @@ export async function placeBid(
       return { message: "Your bid must be higher than the current bid.", status: "error" };
     }
 
-    // AI Fraud Detection
-    const fraudCheckResult = await validateBidForFraud({
-        bidAmount: amount,
-        userEmail: email,
-        userName: name,
-        itemDescription: item.description,
-        currentBid: item.currentBid,
-    });
+    // AI Fraud Detection Temporarily Disabled
+    // const fraudCheckResult = await validateBidForFraud({
+    //     bidAmount: amount,
+    //     userEmail: email,
+    //     userName: name,
+    //     itemDescription: item.description,
+    //     currentBid: item.currentBid,
+    // });
 
-    if (fraudCheckResult.isFraudulent) {
-        return {
-            message: `Bid flagged as potentially fraudulent: ${fraudCheckResult.reason}`,
-            status: "error",
-        };
-    }
+    // if (fraudCheckResult.isFraudulent) {
+    //     return {
+    //         message: `Bid flagged as potentially fraudulent: ${fraudCheckResult.reason}`,
+    //         status: "error",
+    //     };
+    // }
 
     await itemRef.update({
       currentBid: amount,
