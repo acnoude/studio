@@ -40,7 +40,8 @@ if (getAdminApps().length === 0) {
 
 
 const adminAuth = getAdminAuth(adminApp);
-const adminDb = getAdminFirestore(adminApp, "hhsilentbid");
+const adminDb = getAdminFirestore(adminApp);
+adminDb.settings({ databaseId: 'hhsilentbid' });
 const adminStorage = getAdminStorage(adminApp);
 
 export { adminApp, adminAuth, adminDb, adminStorage };
