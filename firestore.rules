@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public can read items
+    // Only admin can write items
+    match /items/{itemId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
