@@ -31,16 +31,19 @@ import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { toggleItemStatus } from "@/app/actions";
-import { ArrowUpDown, QrCode } from "lucide-react";
+import { ArrowUpDown, Users, QrCode } from "lucide-react";
 import { Button } from "../ui/button";
 import { QrCodeModal } from "./qr-code-modal";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BidHistoryModal } from "./bid-history-modal";
 
 export function AdminItemsTable() {
   const [items, setItems] = React.useState<AuctionItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedItemForQr, setSelectedItemForQr] =
+    React.useState<AuctionItem | null>(null);
+  const [selectedItemForHistory, setSelectedItemForHistory] =
     React.useState<AuctionItem | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -146,14 +149,24 @@ export function AdminItemsTable() {
       cell: ({ row }) => {
         const item = row.original;
         return (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSelectedItemForQr(item)}
-          >
-            <QrCode className="h-4 w-4" />
-            <span className="sr-only">Show QR Code</span>
-          </Button>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSelectedItemForHistory(item)}
+            >
+              <Users className="h-4 w-4" />
+              <span className="sr-only">Show Bid History</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSelectedItemForQr(item)}
+            >
+              <QrCode className="h-4 w-4" />
+              <span className="sr-only">Show QR Code</span>
+            </Button>
+          </div>
         );
       },
     },
@@ -273,6 +286,11 @@ export function AdminItemsTable() {
         item={selectedItemForQr}
         isOpen={!!selectedItemForQr}
         onOpenChange={() => setSelectedItemForQr(null)}
+      />
+      <BidHistoryModal
+        item={selectedItemForHistory}
+        isOpen={!!selectedItemForHistory}
+        onOpenChange={() => setSelectedItemForHistory(null)}
       />
     </>
   );

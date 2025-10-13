@@ -13,6 +13,9 @@ const bidSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   amount: z.number().positive("Bid amount must be positive."),
   itemId: z.string(),
+  terms: z.boolean().refine(val => val === true, {
+    message: "You must agree to the terms and conditions.",
+  }),
 });
 
 export async function placeBid(
@@ -23,7 +26,8 @@ export async function placeBid(
     const rawFormData = Object.fromEntries(formData.entries());
     const parsedBid = bidSchema.safeParse({
         ...rawFormData,
-        amount: Number(rawFormData.amount)
+        amount: Number(rawFormData.amount),
+        terms: rawFormData.terms === 'on'
     });
 
     if (!parsedBid.success) {
@@ -62,15 +66,31 @@ export async function placeBid(
             status: "error",
         };
     }
+    
+    const batch = adminDb.batch();
 
-    await itemRef.update({
+    // Update the main item document
+    batch.update(itemRef, {
       currentBid: amount,
       highestBidderName: name,
       highestBidderEmail: email,
     });
 
+    // Add a record to the bids subcollection
+    const bidRef = itemRef.collection('bids').doc();
+    batch.set(bidRef, {
+        name,
+        email,
+        amount,
+        createdAt: FieldValue.serverTimestamp(),
+        itemId,
+    });
+
+    await batch.commit();
+
     revalidatePath("/");
     revalidatePath("/admin");
+    revalidatePath("/leaderboard");
 
     return { message: "Bid placed successfully!", status: "success" };
   } catch (error) {
@@ -123,6 +143,7 @@ export async function createItem(prevState: any, formData: FormData) {
 
         revalidatePath('/admin');
         revalidatePath('/');
+        revalidatePath('/leaderboard');
         return { message: 'Item created successfully!', status: 'success' };
     } catch (e) {
         console.error("[SERVER_ACTION_ERROR] createItem:", e);
@@ -138,6 +159,7 @@ export async function toggleItemStatus(id: string, active: boolean) {
         await itemRef.update({ active: active });
         revalidatePath('/admin');
         revalidatePath('/');
+        revalidatePath('/leaderboard');
         return { message: `Item status updated.`, status: 'success' };
     } catch (error) {
         console.error('[SERVER_ACTION_ERROR] toggleItemStatus:', error);
@@ -160,6 +182,7 @@ export async function toggleGalaStatus(active: boolean) {
 
         revalidatePath('/admin');
         revalidatePath('/');
+        revalidatePath('/leaderboard');
 
         const status = active ? 'started' : 'stopped';
         return { message: `Gala has been ${status}. All items are now ${active ? 'active' : 'inactive'}.`, status: 'success' };

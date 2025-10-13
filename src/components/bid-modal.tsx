@@ -27,6 +27,9 @@ import { useToast } from "@/hooks/use-toast";
 import type { AuctionItem } from "@/lib/types";
 import { placeBid } from "@/app/actions";
 import { Gavel, Loader2, TriangleAlert } from "lucide-react";
+import { Checkbox } from "./ui/checkbox";
+import Link from "next/link";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface BidModalProps {
   item: AuctionItem;
@@ -37,7 +40,10 @@ interface BidModalProps {
 const bidFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  amount: z.coerce.number()
+  amount: z.coerce.number(),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "You must agree to the terms and conditions.",
+  }),
 });
 
 type BidFormValues = z.infer<typeof bidFormSchema>;
@@ -60,6 +66,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
       name: "",
       email: "",
       amount: item.currentBid + item.minIncrement,
+      terms: false,
     },
   });
 
@@ -81,6 +88,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         name: "",
         email: "",
         amount: item.currentBid + item.minIncrement,
+        terms: false,
       })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -88,7 +96,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">Place Your Bid</DialogTitle>
           <DialogDescription>
@@ -149,6 +157,36 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
                     </div>
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="terms"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      name="terms"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      I agree to the{" "}
+                      <Link href="/terms" target="_blank" className="underline hover:text-primary">
+                        terms and conditions
+                      </Link>
+                      .
+                    </FormLabel>
+                     <ScrollArea className="h-24 w-full pr-4">
+                        <p className="text-xs text-muted-foreground">
+                            By placing this bid, you are entering into a binding contract. If you are the winning bidder, you are obligated to purchase the item at the price of your winning bid. All sales are final. Items are sold as-is, where-is, with no warranties expressed or implied. The auctioneer reserves the right to accept or reject any and all bids. Payment is due in full at the close of the auction. Failure to pay may result in being banned from future auctions. Please bid responsibly.
+                        </p>
+                    </ScrollArea>
+                    <FormMessage />
+                  </div>
                 </FormItem>
               )}
             />

@@ -13,3 +13,12 @@ export interface AuctionItem {
   createdAt: Timestamp;
   active: boolean;
 }
+
+export interface Bid {
+    id: string;
+    itemId: string;
+    name: string;
+    email: string;
+    amount: number;
+    createdAt: Timestamp;
+}

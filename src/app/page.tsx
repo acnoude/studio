@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ItemGrid } from "@/components/item-grid";
 import { Logo } from "@/components/logo";
+import { BarChart3 } from "lucide-react";
 
 export default function Home() {
   return (
@@ -11,9 +12,14 @@ export default function Home() {
           <Link href="/">
             <Logo />
           </Link>
-          <Button asChild variant="ghost">
-            <Link href="/admin">Admin Login</Link>
-          </Button>
+           <div className="flex items-center gap-2">
+             <Button asChild variant="outline">
+                <Link href="/leaderboard"><BarChart3 className="mr-2 h-4 w-4" /> View Leaderboard</Link>
+             </Button>
+            <Button asChild variant="ghost">
+                <Link href="/admin">Admin Login</Link>
+            </Button>
+          </div>
         </div>
       </header>
       <main className="flex-1">
@@ -35,12 +41,12 @@ export default function Home() {
             &copy; {new Date().getFullYear()} SilentBid. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Developer: anu devara (Sigma Software Vertex) | For issues contact:{" "}
+            Developer: Sigma Software Vertex | For issues contact:{" "}
             <a
-              href="mailto:anu.devara@vertex.sigma.software"
+              href="mailto:support@sigmasoftware.com"
               className="underline hover:text-foreground"
             >
-              anu.devara@vertex.sigma.software
+              support@sigmasoftware.com
             </a>
           </p>
         </div>
