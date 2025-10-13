@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } from "firebase/firestore";
+import { serverTimestamp } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
@@ -34,10 +34,10 @@ export async function placeBid(
     
     const { name, email, amount, itemId } = parsedBid.data;
 
-    const itemRef = doc(adminDb, "items", itemId);
-    const itemDoc = await getDoc(itemRef);
+    const itemRef = adminDb.doc(`items/${itemId}`);
+    const itemDoc = await itemRef.get();
 
-    if (!itemDoc.exists()) {
+    if (!itemDoc.exists) {
       return { message: "Item not found.", status: "error" };
     }
 
@@ -63,7 +63,7 @@ export async function placeBid(
         };
     }
 
-    await updateDoc(itemRef, {
+    await itemRef.update({
       currentBid: amount,
       highestBidderName: name,
       highestBidderEmail: email,
@@ -106,9 +106,9 @@ export async function createItem(prevState: any, formData: FormData) {
 
         const { name, description, startingBid, minIncrement, imageUrl } = parsed.data;
 
-        const itemsCollectionRef = collection(adminDb, "items");
+        const itemsCollectionRef = adminDb.collection("items");
         
-        await addDoc(itemsCollectionRef, {
+        await itemsCollectionRef.add({
             name,
             description,
             startingBid,
@@ -134,8 +134,8 @@ export async function createItem(prevState: any, formData: FormData) {
 
 export async function toggleItemStatus(id: string, active: boolean) {
     try {
-        const itemRef = doc(adminDb, 'items', id);
-        await updateDoc(itemRef, { active: active });
+        const itemRef = adminDb.doc(`items/${id}`);
+        await itemRef.update({ active: active });
         revalidatePath('/admin');
         revalidatePath('/');
         return { message: `Item status updated.`, status: 'success' };
@@ -148,7 +148,7 @@ export async function toggleItemStatus(id: string, active: boolean) {
 
 export async function toggleGalaStatus(active: boolean) {
     try {
-        const itemsCollection = collection(adminDb, 'items');
+        const itemsCollection = adminDb.collection('items');
         const querySnapshot = await itemsCollection.get();
         const batch = adminDb.batch();
 
