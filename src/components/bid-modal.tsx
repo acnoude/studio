@@ -58,14 +58,14 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         message: `Your bid must be higher than the current bid of $${item.currentBid.toLocaleString()}.`,
         path: ["amount"],
       }).refine((data) => (data.amount - item.currentBid) % item.minIncrement === 0 || item.currentBid === item.startingBid, {
-        message: `Bid must be in increments of $${item.minIncrement.toLocaleString()}. The next valid bid is $${item.currentBid + item.minIncrement}.`,
+        message: `Bid must be in increments of $${item.minIncrement.toLocaleString()}. The next valid bid is $${(item.currentBid === item.startingBid ? item.startingBid : item.currentBid) + item.minIncrement}.`,
         path: ["amount"],
       })
     ),
     defaultValues: {
       name: "",
       email: "",
-      amount: item.currentBid + item.minIncrement,
+      amount: item.currentBid === item.startingBid ? item.startingBid : item.currentBid + item.minIncrement,
       terms: false,
     },
   });
@@ -87,7 +87,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
       form.reset({
         name: "",
         email: "",
-        amount: item.currentBid + item.minIncrement,
+        amount: item.currentBid === item.startingBid ? item.startingBid : item.currentBid + item.minIncrement,
         terms: false,
       })
     }
