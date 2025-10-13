@@ -74,8 +74,9 @@ export async function placeBid(
 
     return { message: "Bid placed successfully!", status: "success" };
   } catch (error) {
-    console.error("Error placing bid:", error);
-    return { message: "An unexpected error occurred. Please try again.", status: "error" };
+    console.error("[SERVER_ACTION_ERROR] placeBid:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return { message: `An unexpected error occurred: ${errorMessage}`, status: "error" };
   }
 }
 
@@ -105,7 +106,9 @@ export async function createItem(prevState: any, formData: FormData) {
 
         const { name, description, startingBid, minIncrement, imageUrl } = parsed.data;
 
-        await addDoc(collection(adminDb, "items"), {
+        const itemsCollectionRef = collection(adminDb, "items");
+        
+        await addDoc(itemsCollectionRef, {
             name,
             description,
             startingBid,
@@ -122,8 +125,9 @@ export async function createItem(prevState: any, formData: FormData) {
         revalidatePath('/');
         return { message: 'Item created successfully!', status: 'success' };
     } catch (e) {
-        console.error(e);
-        return { message: 'Failed to create item', status: 'error' };
+        console.error("[SERVER_ACTION_ERROR] createItem:", e);
+        const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred.";
+        return { message: `Failed to create item: ${errorMessage}`, status: 'error' };
     }
 }
 
@@ -136,8 +140,9 @@ export async function toggleItemStatus(id: string, active: boolean) {
         revalidatePath('/');
         return { message: `Item status updated.`, status: 'success' };
     } catch (error) {
-        console.error('Error toggling item status', error);
-        return { message: 'Failed to update item status.', status: 'error' };
+        console.error('[SERVER_ACTION_ERROR] toggleItemStatus:', error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to update item status.";
+        return { message: `Failed to update item status: ${errorMessage}`, status: 'error' };
     }
 }
 
@@ -159,7 +164,8 @@ export async function toggleGalaStatus(active: boolean) {
         const status = active ? 'started' : 'stopped';
         return { message: `Gala has been ${status}. All items are now ${active ? 'active' : 'inactive'}.`, status: 'success' };
     } catch(error) {
-        console.error('Error toggling gala status:', error);
-        return { message: 'Failed to update gala status.', status: 'error' };
+        console.error('[SERVER_ACTION_ERROR] toggleGalaStatus:', error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to update gala status.";
+        return { message: `Failed to update gala status: ${errorMessage}`, status: 'error' };
     }
 }
