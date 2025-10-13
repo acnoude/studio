@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useFormState } from "react-dom";
+import { useEffect, useState, useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -44,7 +43,7 @@ const formSchema = z.object({
 });
 
 export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) {
-  const [initialState, formAction] = useFormState(createItem, null);
+  const [initialState, formAction] = useActionState(createItem, null);
   const [imageUploadLoading, setImageUploadLoading] = useState(false);
   const { toast } = useToast();
 
