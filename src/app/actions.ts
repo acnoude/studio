@@ -5,7 +5,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/server";
-// import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
+import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
 
 const bidSchema = z.object({
@@ -39,7 +39,7 @@ export async function placeBid(
     const itemDoc = await itemRef.get();
 
     if (!itemDoc.exists) {
-      return { message: "Item not found.", status: "error" };
+      return { message: `Item with ID "${itemId}" not found.`, status: "error" };
     }
 
     const item = itemDoc.data() as AuctionItem;
@@ -48,21 +48,20 @@ export async function placeBid(
       return { message: "Your bid must be higher than the current bid.", status: "error" };
     }
 
-    // AI Fraud Detection Temporarily Disabled
-    // const fraudCheckResult = await validateBidForFraud({
-    //     bidAmount: amount,
-    //     userEmail: email,
-    //     userName: name,
-    //     itemDescription: item.description,
-    //     currentBid: item.currentBid,
-    // });
+    const fraudCheckResult = await validateBidForFraud({
+        bidAmount: amount,
+        userEmail: email,
+        userName: name,
+        itemDescription: item.description,
+        currentBid: item.currentBid,
+    });
 
-    // if (fraudCheckResult.isFraudulent) {
-    //     return {
-    //         message: `Bid flagged as potentially fraudulent: ${fraudCheckResult.reason}`,
-    //         status: "error",
-    //     };
-    // }
+    if (fraudCheckResult.isFraudulent) {
+        return {
+            message: `Bid flagged as potentially fraudulent: ${fraudCheckResult.reason}`,
+            status: "error",
+        };
+    }
 
     await itemRef.update({
       currentBid: amount,
@@ -76,7 +75,7 @@ export async function placeBid(
     return { message: "Bid placed successfully!", status: "success" };
   } catch (error) {
     console.error("[SERVER_ACTION_ERROR] placeBid:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return { message: `An unexpected error occurred: ${errorMessage}`, status: "error" };
   }
 }
