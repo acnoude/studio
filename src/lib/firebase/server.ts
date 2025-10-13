@@ -15,7 +15,10 @@ let adminApp;
 if (getAdminApps().length === 0) {
   if (process.env.NODE_ENV === 'production') {
     // Production: Use default service account credentials
-    adminApp = initializeAdminApp();
+    adminApp = initializeAdminApp({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    });
   } else {
     // Development: Use a service account key if available, otherwise ADC
     try {
@@ -47,3 +50,4 @@ const adminDb = getAdminFirestore(adminApp);
 const adminStorage = getAdminStorage(adminApp);
 
 export { adminApp, adminAuth, adminDb, adminStorage };
+
