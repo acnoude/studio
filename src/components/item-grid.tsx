@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { collection, query, onSnapshot, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase/client";
 import type { AuctionItem } from "@/lib/types";
 import { ItemCard, ItemCardSkeleton } from "@/components/item-card";
 

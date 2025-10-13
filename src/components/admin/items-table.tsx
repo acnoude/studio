@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase/client";
 import type { AuctionItem } from "@/lib/types";
 import {
   Table,
@@ -45,7 +45,6 @@ export function AdminItemsTable() {
         variant: "destructive",
       });
     }
-    setIsToggling(false);
   };
 
   const columns: ColumnDef<AuctionItem>[] = [
@@ -114,8 +113,8 @@ export function AdminItemsTable() {
         <div className="flex items-center gap-2">
           <Switch
             checked={row.getValue("active")}
-            onCheckedChange={() =>
-              handleStatusToggle(row.original.id, row.getValue("active"))
+            onCheckedChange={(currentStatus) =>
+              handleStatusToggle(row.original.id, currentStatus)
             }
             aria-label="Toggle item status"
           />

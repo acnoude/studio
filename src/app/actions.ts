@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } from "firebase/firestore";
-import { adminDb } from "@/lib/firebase";
+import { adminDb } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
 
