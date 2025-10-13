@@ -35,7 +35,7 @@ export default function Home() {
             &copy; {new Date().getFullYear()} SilentBid. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Developer: anu devara | For issues contact:{" "}
+            Developer: anu devara (Sigma Software Vertex) | For issues contact:{" "}
             <a
               href="mailto:anu.devara@vertex.sigma.software"
               className="underline hover:text-foreground"
