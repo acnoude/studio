@@ -28,7 +28,7 @@ if (!getAdminApps().length) {
     adminApp = getAdminApp();
 }
 
-const adminDb = getAdminFirestore(adminApp, "hhsilentbid");
+const adminDb = getAdminFirestore(adminApp);
 const adminAuth = getAdminAuth(adminApp);
 const adminStorage = getAdminStorage(adminApp);
 
