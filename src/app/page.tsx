@@ -28,9 +28,18 @@ export default function Home() {
         </section>
       </main>
       <footer className="border-t">
-        <div className="container mx-auto flex h-16 items-center justify-center p-4">
+        <div className="container mx-auto flex flex-col h-24 items-center justify-center p-4 text-center">
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} SilentBid. All rights reserved.
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Developer: anu devara | For issues contact:{" "}
+            <a
+              href="mailto:anu.devara@vertex.sigma.software"
+              className="underline hover:text-foreground"
+            >
+              anu.devara@vertex.sigma.software
+            </a>
           </p>
         </div>
       </footer>
