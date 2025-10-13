@@ -1,8 +1,9 @@
+
 "use server";
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { serverTimestamp } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
@@ -117,7 +118,7 @@ export async function createItem(prevState: any, formData: FormData) {
             currentBid: startingBid,
             highestBidderName: null,
             highestBidderEmail: null,
-            createdAt: serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
             active: true,
         });
 
