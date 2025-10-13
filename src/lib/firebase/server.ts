@@ -1,4 +1,3 @@
-
 import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, type ServiceAccount } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
@@ -41,7 +40,7 @@ if (getAdminApps().length === 0) {
 
 
 const adminAuth = getAdminAuth(adminApp);
-const adminDb = getAdminFirestore(adminApp);
+const adminDb = getAdminFirestore(adminApp, "hhsilentbid");
 const adminStorage = getAdminStorage(adminApp);
 
 export { adminApp, adminAuth, adminDb, adminStorage };

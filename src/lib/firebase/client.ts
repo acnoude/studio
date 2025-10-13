@@ -1,4 +1,3 @@
-
 "use client";
 
 import { initializeApp, getApps, getApp } from "firebase/app";
@@ -19,7 +18,7 @@ const firebaseConfig = {
 // Client-side Firebase
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getFirestore(app, "hhsilentbid");
 const storage = getStorage(app);
 const functions = getFunctions(app);
 
