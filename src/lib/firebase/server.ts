@@ -7,24 +7,22 @@ import "server-only";
 let adminApp: App;
 
 if (!getAdminApps().length) {
-    try {
-        console.log('Initializing Firebase Admin SDK...');
-        const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-        if (!serviceAccountString) {
-            throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set. Falling back to default credentials.");
+    const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (serviceAccountString) {
+        try {
+            const serviceAccount = JSON.parse(serviceAccountString);
+            adminApp = initializeAdminApp({
+                credential: cert(serviceAccount),
+                projectId: 'hhsilentbidding',
+                storageBucket: 'hhsilentbidding.appspot.com',
+            });
+        } catch (e: any) {
+            console.error("Error parsing FIREBASE_SERVICE_ACCOUNT_KEY. Initializing with default credentials.", e.message);
+            adminApp = initializeAdminApp({ projectId: 'hhsilentbidding' });
         }
-        const serviceAccount = JSON.parse(serviceAccountString);
-        adminApp = initializeAdminApp({
-            credential: cert(serviceAccount),
-            projectId: 'hhsilentbidding',
-            storageBucket: 'hhsilentbidding.appspot.com',
-        });
-    } catch (e: any) {
-        console.error("Failed to initialize with Service Account. Falling back to default credentials.", e.message);
-        console.log('Initializing Firebase Admin SDK with Application Default Credentials...');
-        adminApp = initializeAdminApp({
-            projectId: 'hhsilentbidding',
-        });
+    } else {
+        console.warn("FIREBASE_SERVICE_ACCOUNT_KEY not found. Initializing with default credentials. This is not recommended for production.");
+        adminApp = initializeAdminApp({ projectId: 'hhsilentbidding' });
     }
 } else {
     adminApp = getAdminApp();

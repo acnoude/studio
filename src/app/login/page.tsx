@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +29,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { Loader2, TriangleAlert } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -40,7 +39,6 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,26 +58,6 @@ export default function LoginPage() {
       setError(error.message || "An unknown error occurred.");
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleCreateAdmin() {
-    const values = form.getValues();
-    if (!form.trigger()) {
-        return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-        await createUserWithEmailAndPassword(auth, values.email, values.password);
-        toast({
-            title: "Admin user created!",
-            description: "You can now sign in with the same credentials.",
-        });
-    } catch (error: any) {
-        setError(error.message || "An unknown error occurred.");
-    } finally {
-        setLoading(false);
     }
   }
 
@@ -138,10 +116,6 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
-                </Button>
-                <Button type="button" variant="secondary" className="w-full" onClick={handleCreateAdmin} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Admin
                 </Button>
               </div>
             </form>
