@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "item-1",
+      "description": "A vintage leather-bound journal.",
+      "imageUrl": "https://picsum.photos/seed/1/600/400",
+      "imageHint": "vintage journal"
+    },
+    {
+      "id": "item-2",
+      "description": "A weekend getaway package to a luxury resort.",
+      "imageUrl": "https://picsum.photos/seed/2/600/400",
+      "imageHint": "luxury resort"
+    },
+    {
+      "id": "item-3",
+      "description": "An original abstract painting by a local artist.",
+      "imageUrl": "https://picsum.photos/seed/3/600/400",
+      "imageHint": "abstract painting"
+    },
+    {
+      "id": "item-4",
+      "description": "A signed first edition of a classic novel.",
+      "imageUrl": "https://picsum.photos/seed/4/600/400",
+      "imageHint": "signed book"
+    },
+    {
+      "id": "item-5",
+      "description": "A private cooking class with a renowned chef.",
+      "imageUrl": "https://picsum.photos/seed/5/600/400",
+      "imageHint": "cooking class"
+    },
+    {
+      "id": "item-6",
+      "description": "A high-end set of noise-cancelling headphones.",
+      "imageUrl": "https://picsum.photos/seed/6/600/400",
+      "imageHint": "headphones"
+    },
+    {
+      "id": "item-7",
+      "description": "A handcrafted ceramic vase.",
+      "imageUrl":://picsum.photos/seed/7/600/400",
+      "imageHint": "ceramic vase"
+    },
+    {
+      "id": "item-8",
+      "description": "Tickets to a sold-out concert.",
+      "imageUrl": "https://picsum.photos/seed/8/600/400",
+      "imageHint": "concert tickets"
+    }
+  ]
 }
