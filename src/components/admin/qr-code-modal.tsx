@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { AuctionItem } from "@/lib/types";
-import { QRCode } from "qrcode.react";
+import QRCode from "qrcode.react";
 
 interface QrCodeModalProps {
   item: AuctionItem | null;
