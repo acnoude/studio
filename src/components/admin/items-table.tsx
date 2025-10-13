@@ -25,13 +25,15 @@ import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { toggleItemStatus } from "@/app/actions";
-import { ArrowUpDown, ExternalLink } from "lucide-react";
+import { ArrowUpDown, QrCode } from "lucide-react";
 import { Button } from "../ui/button";
+import { QrCodeModal } from "./qr-code-modal";
 
 export function AdminItemsTable() {
   const [items, setItems] = React.useState<AuctionItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [selectedItemForQr, setSelectedItemForQr] = React.useState<AuctionItem | null>(null);
   const { toast } = useToast();
 
   const handleStatusToggle = async (id: string, newStatus: boolean) => {
@@ -124,6 +126,18 @@ export function AdminItemsTable() {
         </div>
       ),
     },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const item = row.original;
+            return (
+                <Button variant="outline" size="icon" onClick={() => setSelectedItemForQr(item)}>
+                    <QrCode className="h-4 w-4" />
+                    <span className="sr-only">Show QR Code</span>
+                </Button>
+            )
+        }
+    }
   ];
 
   React.useEffect(() => {
@@ -154,49 +168,56 @@ export function AdminItemsTable() {
   }
 
   return (
-    <div className="rounded-lg border shadow-sm">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} className={header.id === 'currentBid' ? 'text-right' : ''}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+    <>
+      <div className="rounded-lg border shadow-sm">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id} className={header.id === 'currentBid' ? 'text-right' : ''}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No items found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No items found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <QrCodeModal 
+        item={selectedItemForQr}
+        isOpen={!!selectedItemForQr}
+        onOpenChange={() => setSelectedItemForQr(null)}
+      />
+    </>
   );
 }
