@@ -56,17 +56,6 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
       imageUrl: "",
     },
   });
-
-  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    const formData = new FormData();
-    formData.append("name", values.name);
-    formData.append("description", values.description);
-    formData.append("startingBid", values.startingBid.toString());
-    formData.append("minIncrement", values.minIncrement.toString());
-    formData.append("imageUrl", values.imageUrl);
-    
-    formAction(formData);
-  };
   
   useEffect(() => {
     if(state?.status === 'success') {
@@ -96,7 +85,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
