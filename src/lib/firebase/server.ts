@@ -4,14 +4,16 @@ import { getFirestore as getAdminFirestore, FieldValue } from "firebase-admin/fi
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
 import "server-only";
 
-// @ts-ignore - This file may not exist in development
-import * as serviceAccount from "../../../serviceAccountKey.json";
-
 let adminApp: App;
 
 if (!getAdminApps().length) {
     try {
-        console.log('Initializing Firebase Admin SDK with Service Account...');
+        console.log('Initializing Firebase Admin SDK...');
+        const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (!serviceAccountString) {
+            throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set. Falling back to default credentials.");
+        }
+        const serviceAccount = JSON.parse(serviceAccountString);
         adminApp = initializeAdminApp({
             credential: cert(serviceAccount),
             projectId: 'hhsilentbidding',
