@@ -2,11 +2,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public can read items
-    // Only admin can write items
     match /items/{itemId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      // Allow anyone to view the auction items
+      allow get, list: if true;
+      
+      // Only allow authenticated users (admins) to create, update, or delete items
+      allow create, update, delete: if request.auth != null;
     }
   }
 }
