@@ -98,12 +98,12 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         <div className="text-center bg-muted/50 p-4 rounded-md">
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <p className="text-sm text-muted-foreground">Current Bid</p>
-                    <p className="text-3xl font-bold font-headline text-accent">${item.currentBid.toLocaleString()}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Current Bid</p>
+                    <p className="text-2xl sm:text-3xl font-bold font-headline text-accent">${item.currentBid.toLocaleString()}</p>
                 </div>
                  <div>
-                    <p className="text-sm text-muted-foreground">Min Increment</p>
-                    <p className="text-3xl font-bold font-headline text-accent">${item.minIncrement.toLocaleString()}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Min Increment</p>
+                    <p className="text-2xl sm:text-3xl font-bold font-headline text-accent">${item.minIncrement.toLocaleString()}</p>
                 </div>
             </div>
         </div>

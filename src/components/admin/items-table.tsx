@@ -20,6 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
@@ -28,13 +34,16 @@ import { toggleItemStatus } from "@/app/actions";
 import { ArrowUpDown, QrCode } from "lucide-react";
 import { Button } from "../ui/button";
 import { QrCodeModal } from "./qr-code-modal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AdminItemsTable() {
   const [items, setItems] = React.useState<AuctionItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [selectedItemForQr, setSelectedItemForQr] = React.useState<AuctionItem | null>(null);
+  const [selectedItemForQr, setSelectedItemForQr] =
+    React.useState<AuctionItem | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleStatusToggle = async (id: string, newStatus: boolean) => {
     const result = await toggleItemStatus(id, newStatus);
@@ -72,7 +81,9 @@ export function AdminItemsTable() {
           />
           <div className="flex flex-col">
             <span className="font-medium">{row.getValue("name")}</span>
-            <span className="text-xs text-muted-foreground line-clamp-1">{row.original.description}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">
+              {row.original.description}
+            </span>
           </div>
         </div>
       ),
@@ -99,12 +110,16 @@ export function AdminItemsTable() {
       header: "Highest Bidder",
       cell: ({ row }) => (
         <div>
-            {row.original.highestBidderName ? (
-                <div>
-                    <p>{row.original.highestBidderName}</p>
-                    <p className="text-xs text-muted-foreground">{row.original.highestBidderEmail}</p>
-                </div>
-            ) : <span className="text-muted-foreground">No bids yet</span>}
+          {row.original.highestBidderName ? (
+            <div>
+              <p>{row.original.highestBidderName}</p>
+              <p className="text-xs text-muted-foreground">
+                {row.original.highestBidderEmail}
+              </p>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">No bids yet</span>
+          )}
         </div>
       ),
     },
@@ -127,17 +142,21 @@ export function AdminItemsTable() {
       ),
     },
     {
-        id: "actions",
-        cell: ({ row }) => {
-            const item = row.original;
-            return (
-                <Button variant="outline" size="icon" onClick={() => setSelectedItemForQr(item)}>
-                    <QrCode className="h-4 w-4" />
-                    <span className="sr-only">Show QR Code</span>
-                </Button>
-            )
-        }
-    }
+      id: "actions",
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSelectedItemForQr(item)}
+          >
+            <QrCode className="h-4 w-4" />
+            <span className="sr-only">Show QR Code</span>
+          </Button>
+        );
+      },
+    },
   ];
 
   React.useEffect(() => {
@@ -166,6 +185,34 @@ export function AdminItemsTable() {
   if (loading) {
     return <div>Loading items...</div>;
   }
+  
+  if (isMobile) {
+    return (
+        <div className="grid gap-4">
+            {table.getRowModel().rows.map(row => (
+                <Card key={row.id}>
+                    <CardHeader>
+                        {flexRender(row.getVisibleCells()[0].column.columnDef.cell, row.getVisibleCells()[0].getContext())}
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">Current Bid</p>
+                            {flexRender(row.getVisibleCells()[1].column.columnDef.cell, row.getVisibleCells()[1].getContext())}
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">Highest Bidder</p>
+                            {flexRender(row.getVisibleCells()[2].column.columnDef.cell, row.getVisibleCells()[2].getContext())}
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                       {flexRender(row.getVisibleCells()[3].column.columnDef.cell, row.getVisibleCells()[3].getContext())}
+                       {flexRender(row.getVisibleCells()[4].column.columnDef.cell, row.getVisibleCells()[4].getContext())}
+                    </CardFooter>
+                </Card>
+            ))}
+        </div>
+    )
+  }
 
   return (
     <>
@@ -176,7 +223,10 @@ export function AdminItemsTable() {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className={header.id === 'currentBid' ? 'text-right' : ''}>
+                    <TableHead
+                      key={header.id}
+                      className={header.id === "currentBid" ? "text-right" : ""}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -198,14 +248,20 @@ export function AdminItemsTable() {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No items found.
                 </TableCell>
               </TableRow>
@@ -213,7 +269,7 @@ export function AdminItemsTable() {
           </TableBody>
         </Table>
       </div>
-      <QrCodeModal 
+      <QrCodeModal
         item={selectedItemForQr}
         isOpen={!!selectedItemForQr}
         onOpenChange={() => setSelectedItemForQr(null)}

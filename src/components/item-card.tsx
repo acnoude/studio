@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Card,
@@ -26,37 +27,41 @@ export function ItemCard({ item }: ItemCardProps) {
   return (
     <>
       <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-        <CardHeader className="p-0">
-          <div className="aspect-[3/2] relative">
-            <Image
-              src={item.imageUrl}
-              alt={item.name}
-              fill
-              className="object-cover"
-              data-ai-hint="auction item"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-6">
-          <CardTitle className="font-headline text-2xl mb-2">{item.name}</CardTitle>
-          <CardDescription className="flex-1">{item.description}</CardDescription>
-        </CardContent>
-        <CardFooter className="flex-col items-start gap-4 p-6 pt-0">
-          <div>
-            <p className="text-sm text-muted-foreground">Current Bid</p>
-            <p className="text-3xl font-bold font-headline text-accent">
-              ${item.currentBid.toLocaleString()}
-            </p>
-          </div>
-          <Button
-            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-            onClick={() => setIsBidModalOpen(true)}
-          >
-            <Gavel className="mr-2 h-4 w-4" />
-            Place Bid
-          </Button>
-        </CardFooter>
+        <Link href={`/item/${item.id}`} className="flex flex-col h-full">
+            <CardHeader className="p-0">
+            <div className="aspect-[3/2] relative">
+                <Image
+                src={item.imageUrl}
+                alt={item.name}
+                fill
+                className="object-cover"
+                data-ai-hint="auction item"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+            </div>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-6">
+            <CardTitle className="font-headline text-xl md:text-2xl mb-2">{item.name}</CardTitle>
+            <CardDescription className="flex-1 text-sm">{item.description}</CardDescription>
+            </CardContent>
+            <CardFooter className="flex-col items-start gap-4 p-6 pt-0">
+            <div>
+                <p className="text-sm text-muted-foreground">Current Bid</p>
+                <p className="text-2xl md:text-3xl font-bold font-headline text-accent">
+                ${item.currentBid.toLocaleString()}
+                </p>
+            </div>
+            </CardFooter>
+        </Link>
+        <div className="px-6 pb-6">
+            <Button
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={() => setIsBidModalOpen(true)}
+            >
+                <Gavel className="mr-2 h-4 w-4" />
+                Place Bid
+            </Button>
+        </div>
       </Card>
       <BidModal
         item={item}
