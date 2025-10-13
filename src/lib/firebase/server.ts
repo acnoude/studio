@@ -3,20 +3,17 @@ import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
+import * as serviceAccount from "../../../serviceAccountKey.json";
 import "server-only";
 
-// The serviceAccountKey.json is read from an environment variable.
-// This is a more secure and standard way to handle credentials in production.
-const serviceAccount = JSON.parse(
-  process.env.SERVICE_ACCOUNT_KEY || "{}"
-);
-
-const appName = 'firebase-admin-app';
+const appName = 'firebase-admin-app-silentbid';
 let adminApp: App;
 
+// This prevents initializing the app multiple times in server environments
 if (!getAdminApps().some(app => app.name === appName)) {
   adminApp = initializeAdminApp({
-    credential: cert(serviceAccount),
+    // Type assertion to satisfy 'cert' function's expectation.
+    credential: cert(serviceAccount as any),
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   }, appName);
 } else {
