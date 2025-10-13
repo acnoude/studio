@@ -108,7 +108,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
             </div>
         </div>
         <Form {...form}>
-          <form action={formAction} className="space-y-4" onSubmit={form.handleSubmit(() => formAction(new FormData(document.querySelector('form')!)))}>
+          <form action={formAction} className="space-y-4">
             <input type="hidden" name="itemId" value={item.id} />
             <FormField
               control={form.control}
