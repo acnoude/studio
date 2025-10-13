@@ -1,3 +1,4 @@
+
 import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, cert, type App } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
@@ -10,15 +11,16 @@ const serviceAccount = JSON.parse(
   process.env.SERVICE_ACCOUNT_KEY || "{}"
 );
 
+const appName = 'firebase-admin-app';
 let adminApp: App;
 
-if (!getAdminApps().length) {
+if (!getAdminApps().some(app => app.name === appName)) {
   adminApp = initializeAdminApp({
     credential: cert(serviceAccount),
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  });
+  }, appName);
 } else {
-  adminApp = getAdminApp();
+  adminApp = getAdminApp(appName);
 }
 
 const adminDb = getAdminFirestore(adminApp);
