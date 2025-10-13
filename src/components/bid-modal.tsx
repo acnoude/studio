@@ -37,15 +37,13 @@ interface BidModalProps {
 const bidFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  amount: z.coerce
-    .number()
-    .gt(item => item.currentBid, { message: "Bid must be higher than current bid." }),
+  amount: z.coerce.number()
 });
 
 type BidFormValues = z.infer<typeof bidFormSchema>;
 
 export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
-  const [state, formAction] = useActionState(placeBid, null);
+  const [state, formAction, isPending] = useActionState(placeBid, null);
   const { toast } = useToast();
 
   const form = useForm<BidFormValues>({
@@ -53,16 +51,17 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
       bidFormSchema.refine((data) => data.amount > item.currentBid, {
         message: `Your bid must be higher than the current bid of $${item.currentBid.toLocaleString()}.`,
         path: ["amount"],
+      }).refine((data) => (data.amount - item.currentBid) % item.minIncrement === 0 || item.currentBid === item.startingBid, {
+        message: `Bid must be in increments of $${item.minIncrement.toLocaleString()}. The next valid bid is $${item.currentBid + item.minIncrement}.`,
+        path: ["amount"],
       })
     ),
     defaultValues: {
       name: "",
       email: "",
-      amount: item.currentBid + 1,
+      amount: item.currentBid + item.minIncrement,
     },
   });
-
-  const { formState: { isSubmitting }} = form;
 
   useEffect(() => {
     if (state?.status === 'success') {
@@ -81,11 +80,11 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
       form.reset({
         name: "",
         email: "",
-        amount: item.currentBid + 1,
+        amount: item.currentBid + item.minIncrement,
       })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, item]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -97,8 +96,16 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="text-center bg-muted/50 p-4 rounded-md">
-            <p className="text-sm text-muted-foreground">Current Bid</p>
-            <p className="text-4xl font-bold font-headline text-accent">${item.currentBid.toLocaleString()}</p>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <p className="text-sm text-muted-foreground">Current Bid</p>
+                    <p className="text-3xl font-bold font-headline text-accent">${item.currentBid.toLocaleString()}</p>
+                </div>
+                 <div>
+                    <p className="text-sm text-muted-foreground">Min Increment</p>
+                    <p className="text-3xl font-bold font-headline text-accent">${item.minIncrement.toLocaleString()}</p>
+                </div>
+            </div>
         </div>
         <Form {...form}>
           <form action={formAction} className="space-y-4">
@@ -138,7 +145,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
                   <FormControl>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input type="number" className="pl-6" {...field} />
+                        <Input type="number" className="pl-6" step={item.minIncrement} {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -155,8 +162,8 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
             )}
 
             <DialogFooter>
-              <Button type="submit" disabled={isSubmitting} className="w-full bg-accent hover:bg-accent/90">
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gavel className="mr-2 h-4 w-4" />}
+              <Button type="submit" disabled={isPending} className="w-full bg-accent hover:bg-accent/90">
+                {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gavel className="mr-2 h-4 w-4" />}
                 Submit Bid
               </Button>
             </DialogFooter>

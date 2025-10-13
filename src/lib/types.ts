@@ -7,6 +7,7 @@ export interface AuctionItem {
   imageUrl: string;
   startingBid: number;
   currentBid: number;
+  minIncrement: number;
   highestBidderName: string | null;
   highestBidderEmail: string | null;
   createdAt: Timestamp;

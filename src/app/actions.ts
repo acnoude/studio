@@ -83,6 +83,7 @@ const itemSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     description: z.string().min(1, 'Description is required'),
     startingBid: z.number().min(0, 'Starting bid must be non-negative'),
+    minIncrement: z.number().positive('Minimum increment must be a positive number'),
     imageUrl: z.string().url('A valid image URL is required'),
 });
 
@@ -93,6 +94,7 @@ export async function createItem(prevState: any, formData: FormData) {
             name: formData.get('name'),
             description: formData.get('description'),
             startingBid: Number(formData.get('startingBid')),
+            minIncrement: Number(formData.get('minIncrement')),
             imageUrl: formData.get('imageUrl'),
         }
 
@@ -101,12 +103,13 @@ export async function createItem(prevState: any, formData: FormData) {
             return { message: 'Invalid data', errors: parsed.error.flatten().fieldErrors };
         }
 
-        const { name, description, startingBid, imageUrl } = parsed.data;
+        const { name, description, startingBid, minIncrement, imageUrl } = parsed.data;
 
         await addDoc(collection(adminDb, "items"), {
             name,
             description,
             startingBid,
+            minIncrement,
             imageUrl,
             currentBid: startingBid,
             highestBidderName: null,

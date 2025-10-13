@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { createItem } from "@/app/actions";
 import { Loader2, PlusCircle } from "lucide-react";
+import { useActionState } from "react";
 
 interface CreateItemModalProps {
   isOpen: boolean;
@@ -39,11 +40,12 @@ const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   startingBid: z.coerce.number().min(0, "Starting bid must be non-negative"),
+  minIncrement: z.coerce.number().positive("Minimum increment must be a positive number"),
   image: z.any().refine((files) => files?.length === 1, "Image is required."),
 });
 
 export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) {
-  const [initialState, formAction] = useActionState(createItem, null);
+  const [state, formAction, isPending] = useActionState(createItem, null);
   const [imageUploadLoading, setImageUploadLoading] = useState(false);
   const { toast } = useToast();
 
@@ -53,10 +55,9 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
       name: "",
       description: "",
       startingBid: 10,
+      minIncrement: 1,
     },
   });
-
-  const { formState: { isSubmitting } } = form;
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setImageUploadLoading(true);
@@ -70,36 +71,42 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
       formData.append("name", values.name);
       formData.append("description", values.description);
       formData.append("startingBid", values.startingBid.toString());
+      formData.append("minIncrement", values.minIncrement.toString());
       formData.append("imageUrl", downloadURL);
       
       formAction(formData);
 
     } catch (error) {
-      console.error("Image upload failed:", error);
-      toast({ title: "Error", description: "Image upload failed.", variant: "destructive" });
+      console.error("Image upload or form action failed:", error);
+      let message = "An unexpected error occurred.";
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setImageUploadLoading(false);
     }
   };
   
   useEffect(() => {
-    if(initialState?.status === 'success') {
-        toast({ title: "Success", description: initialState.message });
+    if(state?.status === 'success') {
+        toast({ title: "Success", description: state.message });
         onOpenChange(false);
         form.reset();
-    } else if (initialState?.status === 'error') {
-        toast({ title: "Error", description: initialState.message, variant: 'destructive' });
+    } else if (state?.status === 'error') {
+        toast({ title: "Error", description: state.message, variant: 'destructive' });
     }
-  }, [initialState, onOpenChange, toast, form]);
+  }, [state, onOpenChange, toast, form]);
 
   useEffect(() => {
     if (isOpen) {
       form.reset();
+      // Also reset the action state if the form is re-opened
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  const loading = isSubmitting || imageUploadLoading;
+  const loading = isPending || imageUploadLoading;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -141,22 +148,40 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="startingBid"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Starting Bid</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                      <Input type="number" className="pl-6" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startingBid"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Starting Bid</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                        <Input type="number" className="pl-6" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minIncrement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Min. Increment</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                        <Input type="number" className="pl-6" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="image"
