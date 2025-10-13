@@ -1,21 +1,34 @@
-import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp } from 'firebase-admin/app';
+import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, cert, type App } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore, FieldValue } from "firebase-admin/firestore";
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
 import "server-only";
 
-let adminApp;
+// @ts-ignore - This file may not exist in development
+import * as serviceAccount from "../../../serviceAccountKey.json";
+
+let adminApp: App;
 
 if (!getAdminApps().length) {
-    console.log('Initializing Firebase Admin SDK with Application Default Credentials...');
-    adminApp = initializeAdminApp({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    });
+    try {
+        console.log('Initializing Firebase Admin SDK with Service Account...');
+        adminApp = initializeAdminApp({
+            credential: cert(serviceAccount),
+            projectId: 'hhsilentbidding',
+            storageBucket: 'hhsilentbidding.appspot.com',
+        });
+    } catch (e: any) {
+        console.error("Failed to initialize with Service Account. Falling back to default credentials.", e.message);
+        console.log('Initializing Firebase Admin SDK with Application Default Credentials...');
+        adminApp = initializeAdminApp({
+            projectId: 'hhsilentbidding',
+        });
+    }
 } else {
     adminApp = getAdminApp();
 }
 
-const adminDb = getAdminFirestore(adminApp, 'hhsilentbid');
+const adminDb = getAdminFirestore(adminApp);
 const adminAuth = getAdminAuth(adminApp);
 const adminStorage = getAdminStorage(adminApp);
 
