@@ -70,10 +70,13 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
   useEffect(() => {
     if (isOpen) {
       form.reset();
-      // Also reset the action state if the form is re-opened
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  const handleFormSubmit = (formData: FormData) => {
+    formAction(formData);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -85,7 +88,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form action={formAction} className="space-y-4">
+          <form action={handleFormSubmit} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
