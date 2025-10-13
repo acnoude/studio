@@ -70,7 +70,9 @@ export default function ItemPage() {
       <div className="flex flex-col min-h-screen">
        <header className="sticky top-0 z-40 w-full border-b bg-background">
         <div className="container mx-auto flex h-16 items-center justify-between p-4">
-          <Logo />
+          <Link href="/">
+            <Logo />
+          </Link>
           <Button asChild variant="ghost">
             <Link href="/admin">Admin Login</Link>
           </Button>
