@@ -1,24 +1,28 @@
 import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, cert, type App } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
-import { getFirestore as getAdminFirestore, FieldValue } from "firebase-admin/firestore";
+import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
 import "server-only";
-import serviceAccount from "../../../serviceAccountKey.json";
+
+// The serviceAccountKey.json is read from an environment variable.
+// This is a more secure and standard way to handle credentials in production.
+const serviceAccount = JSON.parse(
+  process.env.SERVICE_ACCOUNT_KEY || "{}"
+);
 
 let adminApp: App;
 
 if (!getAdminApps().length) {
-    adminApp = initializeAdminApp({
-        credential: cert(serviceAccount),
-        projectId: 'hhsilentbidding',
-        storageBucket: 'hhsilentbidding.appspot.com',
-    });
+  adminApp = initializeAdminApp({
+    credential: cert(serviceAccount),
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  });
 } else {
-    adminApp = getAdminApp();
+  adminApp = getAdminApp();
 }
 
 const adminDb = getAdminFirestore(adminApp);
 const adminAuth = getAdminAuth(adminApp);
 const adminStorage = getAdminStorage(adminApp);
 
-export { adminApp, adminAuth, adminDb, adminStorage, FieldValue };
+export { adminApp, adminAuth, adminDb, adminStorage };

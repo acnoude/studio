@@ -3,10 +3,10 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
+import { FieldValue } from "firebase-admin/firestore";
 
 const bidSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
