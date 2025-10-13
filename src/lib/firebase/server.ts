@@ -45,6 +45,3 @@ const adminDb = getAdminFirestore(adminApp);
 const adminStorage = getAdminStorage(adminApp);
 
 export { adminApp, adminAuth, adminDb, adminStorage };
-
-
-
