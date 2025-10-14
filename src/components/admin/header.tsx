@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -15,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CreateItemModal } from "@/components/admin/create-item-modal";
 import { useToast } from "@/hooks/use-toast";
-import { toggleGalaStatus } from "@/app/actions";
+import { toggleGalaStatus, exportWinners } from "@/app/actions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function AdminHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
@@ -54,6 +56,28 @@ export function AdminHeader() {
     setIsToggling(false);
   };
   
+  const handleExport = async () => {
+    setIsExporting(true);
+    const result = await exportWinners();
+    if (result.status === 'success' && result.csv) {
+        const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'winners.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast({ title: 'Success', description: 'Winners CSV has been downloaded.' });
+    } else if (result.status === 'info') {
+        toast({ title: 'No Winners Yet', description: 'There are no items with winning bids to export.' });
+    } else {
+        toast({ title: 'Export Failed', description: result.message, variant: 'destructive' });
+    }
+    setIsExporting(false);
+  }
+
   const getInitials = (email: string) => {
     const parts = email.split('@');
     return parts[0].substring(0, 2).toUpperCase();
@@ -101,8 +125,8 @@ export function AdminHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
-              <FileDown className="mr-2 h-4 w-4" />
+            <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
+              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
               Export Winners
             </DropdownMenuItem>
             <DropdownMenuSeparator />

@@ -192,3 +192,31 @@ export async function toggleGalaStatus(active: boolean) {
         return { message: `Failed to update gala status: ${errorMessage}`, status: 'error' };
     }
 }
+
+export async function exportWinners() {
+    try {
+        const itemsSnapshot = await adminDb.collection('items')
+            .where('highestBidderEmail', '!=', null)
+            .get();
+
+        if (itemsSnapshot.empty) {
+            return { message: 'No winners found to export.', status: 'info', csv: '' };
+        }
+
+        const winners = itemsSnapshot.docs.map(doc => doc.data() as AuctionItem);
+
+        let csv = 'ItemName,WinnerName,WinnerEmail,WinningBid\n';
+        winners.forEach(item => {
+            const itemName = `"${item.name.replace(/"/g, '""')}"`;
+            const winnerName = `"${item.highestBidderName?.replace(/"/g, '""')}"`;
+            csv += `${itemName},${winnerName},${item.highestBidderEmail},${item.currentBid}\n`;
+        });
+        
+        return { message: 'Winners exported successfully.', status: 'success', csv };
+
+    } catch (error) {
+        console.error('[SERVER_ACTION_ERROR] exportWinners:', error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to export winners.";
+        return { message: `Failed to export winners: ${errorMessage}`, status: 'error', csv: '' };
+    }
+}
