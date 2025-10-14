@@ -95,22 +95,26 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
   
   // Reset form when modal opens or item changes
   useEffect(() => {
-    if(isOpen) {
-      let bidderInfo = { name: "", email: ""};
+    if (isOpen) {
+      let bidderInfo = { name: "", email: "" };
       try {
         const savedInfo = localStorage.getItem(BIDDER_INFO_KEY);
         if (savedInfo) {
           bidderInfo = JSON.parse(savedInfo);
         }
       } catch (error) {
-          console.error("Could not retrieve bidder info from localStorage", error);
+        console.error("Could not retrieve bidder info from localStorage", error);
       }
-      form.reset({
-        name: bidderInfo.name,
-        email: bidderInfo.email,
+      
+      const newDefaultValues = {
+        name: bidderInfo.name || "",
+        email: bidderInfo.email || "",
         amount: item.currentBid === item.startingBid ? item.startingBid : item.currentBid + item.minIncrement,
         terms: false,
-      });
+      };
+      
+      // Use reset to update the entire form's values
+      form.reset(newDefaultValues);
     }
   }, [isOpen, item, form]);
 
