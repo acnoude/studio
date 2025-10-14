@@ -85,11 +85,15 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
             description: state.message,
         });
         onOpenChange(false);
-        form.reset();
+    } else if (state?.status === 'error') {
+        // This resets the form submission state on error so user can try again
+        // without closing the modal.
+        form.reset(form.getValues());
     }
-  }, [state, toast, onOpenChange, form]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, onOpenChange, toast, form]);
   
-  // Reset form when modal opens
+  // Reset form when modal opens or item changes
   useEffect(() => {
     if(isOpen) {
       let bidderInfo = { name: "", email: ""};
@@ -106,10 +110,9 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         email: bidderInfo.email,
         amount: item.currentBid === item.startingBid ? item.startingBid : item.currentBid + item.minIncrement,
         terms: false,
-      })
+      });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, item]);
+  }, [isOpen, item, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
