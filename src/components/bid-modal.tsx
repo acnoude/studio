@@ -91,7 +91,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         form.reset(form.getValues());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, onOpenChange, toast, form]);
+  }, [state]);
   
   // Reset form when modal opens or item changes
   useEffect(() => {
