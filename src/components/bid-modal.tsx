@@ -48,6 +48,8 @@ const bidFormSchema = z.object({
 
 type BidFormValues = z.infer<typeof bidFormSchema>;
 
+const BIDDER_INFO_KEY = 'silentbid-bidder-info';
+
 export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
   const [state, formAction, isPending] = useActionState(placeBid, null);
   const { toast } = useToast();
@@ -72,6 +74,12 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
 
   useEffect(() => {
     if (state?.status === 'success') {
+        const { name, email } = form.getValues();
+        try {
+          localStorage.setItem(BIDDER_INFO_KEY, JSON.stringify({ name, email }));
+        } catch (error) {
+          console.error("Could not save bidder info to localStorage", error);
+        }
         toast({
             title: "Bid Placed!",
             description: state.message,
@@ -84,9 +92,18 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
   // Reset form when modal opens
   useEffect(() => {
     if(isOpen) {
+      let bidderInfo = { name: "", email: ""};
+      try {
+        const savedInfo = localStorage.getItem(BIDDER_INFO_KEY);
+        if (savedInfo) {
+          bidderInfo = JSON.parse(savedInfo);
+        }
+      } catch (error) {
+          console.error("Could not retrieve bidder info from localStorage", error);
+      }
       form.reset({
-        name: "",
-        email: "",
+        name: bidderInfo.name,
+        email: bidderInfo.email,
         amount: item.currentBid === item.startingBid ? item.startingBid : item.currentBid + item.minIncrement,
         terms: false,
       })
