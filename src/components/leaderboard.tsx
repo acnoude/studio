@@ -15,6 +15,7 @@ export function Leaderboard() {
     const q = query(
         collection(db, "items"), 
         where("active", "==", true),
+        orderBy("active"), // Explicitly order by the filtered field
         orderBy("currentBid", "desc")
     );
     const unsubscribe = onSnapshot(
