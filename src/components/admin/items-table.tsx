@@ -37,7 +37,6 @@ import { Button } from "../ui/button";
 import { QrCodeModal } from "./qr-code-modal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BidHistoryModal } from "./bid-history-modal";
-import { Skeleton } from "../ui/skeleton";
 
 export function AdminItemsTable() {
   const [items, setItems] = React.useState<AuctionItem[]>([]);
@@ -49,6 +48,11 @@ export function AdminItemsTable() {
     React.useState<AuctionItem | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleStatusToggle = async (id: string, newStatus: boolean) => {
     const result = await toggleItemStatus(id, newStatus);
@@ -99,6 +103,7 @@ export function AdminItemsTable() {
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="justify-end w-full"
         >
           Current Bid
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -195,14 +200,13 @@ export function AdminItemsTable() {
     state: {
       sorting,
     },
-    // Hides columns on mobile
-    columnVisibility: isMobile ? {
+    columnVisibility: (isClient && isMobile) ? {
       currentBid: false,
       highestBidderName: false,
     } : {},
   });
 
-  if (loading) {
+  if (loading || !isClient) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -214,12 +218,11 @@ export function AdminItemsTable() {
     return (
         <div className="grid gap-4">
             {table.getRowModel().rows.map(row => (
-                <Card key={row.id}>
-                    <CardHeader>
-                        {/* Manually render the 'name' cell */}
+                <Card key={row.id} className="[&>*:last-child]:border-t">
+                    <CardHeader className="p-4">
                         {flexRender(row.getVisibleCells().find(cell => cell.column.id === 'name')?.column.columnDef.cell, row.getVisibleCells().find(cell => cell.column.id === 'name')?.getContext())}
                     </CardHeader>
-                    <CardContent className="space-y-4 text-sm">
+                    <CardContent className="space-y-4 text-sm p-4">
                         <div>
                             <p className="font-medium text-muted-foreground">Current Bid</p>
                             <p className="font-mono text-lg">${row.original.currentBid.toLocaleString()}</p>
@@ -232,13 +235,14 @@ export function AdminItemsTable() {
                                 <p className="text-xs text-muted-foreground">
                                   {row.original.highestBidderEmail}
                                 </p>
+
                               </div>
                             ) : (
                               <span className="text-muted-foreground">No bids yet</span>
                             )}
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between items-center">
+                    <CardFooter className="flex justify-between items-center p-4">
                        {flexRender(row.getVisibleCells().find(c => c.column.id === 'active')?.column.columnDef.cell, row.getVisibleCells().find(c => c.column.id === 'active')?.getContext())}
                        {flexRender(row.getVisibleCells().find(c => c.column.id === 'actions')?.column.columnDef.cell, row.getVisibleCells().find(c => c.column.id === 'actions')?.getContext())}
                     </CardFooter>
@@ -298,7 +302,12 @@ export function AdminItemsTable() {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={
+                        cell.column.id === "currentBid" ? "text-right" : ""
+                      }
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -333,3 +342,5 @@ export function AdminItemsTable() {
     </>
   );
 }
+
+    
