@@ -6,10 +6,7 @@ import Image from "next/image";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,42 +23,37 @@ export function ItemCard({ item }: ItemCardProps) {
 
   return (
     <>
-      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-        <Link href={`/item/${item.id}`} className="flex flex-col h-full">
-            <CardHeader className="p-0">
-            <div className="aspect-[3/2] relative">
+      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group border-0 shadow-none rounded-2xl bg-card/50 hover:bg-card">
+        <CardContent className="p-4 flex flex-col flex-1">
+          <Link href={`/item/${item.id}`} className="flex flex-col h-full">
+            <div className="aspect-[4/3] relative w-full overflow-hidden rounded-xl mb-4">
                 <Image
-                src={item.imageUrl}
-                alt={item.name}
-                fill
-                className="object-cover"
-                data-ai-hint="auction item"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  src={item.imageUrl}
+                  alt={item.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  data-ai-hint="auction item"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
             </div>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-6">
-            <CardTitle className="font-headline text-xl md:text-2xl mb-2">{item.name}</CardTitle>
-            <CardDescription className="flex-1 text-sm">{item.description}</CardDescription>
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-4 p-6 pt-0">
-            <div>
-                <p className="text-sm text-muted-foreground">Current Bid</p>
-                <p className="text-2xl md:text-3xl font-bold font-headline text-accent">
+            <div className="flex-1 flex flex-col">
+              <h3 className="font-semibold text-lg md:text-xl mb-2 flex-1">{item.name}</h3>
+              <p className="text-sm font-medium text-muted-foreground">Current Bid</p>
+              <p className="text-2xl font-bold">
                 ${item.currentBid.toLocaleString()}
-                </p>
+              </p>
             </div>
-            </CardFooter>
-        </Link>
-        <div className="px-6 pb-6">
-            <Button
-                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-                onClick={() => setIsBidModalOpen(true)}
-            >
-                <Gavel className="mr-2 h-4 w-4" />
-                Place Bid
-            </Button>
-        </div>
+          </Link>
+        </CardContent>
+        <CardFooter className="p-4 pt-0">
+          <Button
+              className="w-full"
+              variant="secondary"
+              onClick={() => setIsBidModalOpen(true)}
+          >
+              Place Bid
+          </Button>
+        </CardFooter>
       </Card>
       <BidModal
         item={item}
@@ -74,20 +66,14 @@ export function ItemCard({ item }: ItemCardProps) {
 
 export function ItemCardSkeleton() {
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader className="p-0">
-        <Skeleton className="aspect-[3/2] w-full" />
-      </CardHeader>
-      <CardContent className="flex-1 p-6">
-        <Skeleton className="h-6 w-3/4 mb-4" />
-        <Skeleton className="h-4 w-full mb-1" />
-        <Skeleton className="h-4 w-5/6" />
+    <Card className="flex flex-col h-full border-0 shadow-none rounded-2xl bg-card/50">
+      <CardContent className="p-4">
+        <Skeleton className="aspect-[4/3] w-full rounded-xl mb-4" />
+        <Skeleton className="h-6 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-1/2 mb-2" />
+        <Skeleton className="h-8 w-1/3" />
       </CardContent>
-      <CardFooter className="flex-col items-start gap-4 p-6 pt-0">
-        <div className="w-full">
-          <Skeleton className="h-4 w-1/4 mb-2" />
-          <Skeleton className="h-8 w-1/2" />
-        </div>
+      <CardFooter className="p-4 pt-0">
         <Skeleton className="h-10 w-full" />
       </CardFooter>
     </Card>
