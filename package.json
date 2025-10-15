@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
-    "@genkit-ai/next": "^1.20.0",
+    "@genkit-ai/next": "^1.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -40,7 +40,7 @@
     "firebase": "^10.12.3",
     "firebase-admin": "^12.2.0",
     "lucide-react": "^0.417.0",
-    "next": "^15.0.0",
+    "next": "^14.2.5",
     "qrcode.react": "^3.1.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
