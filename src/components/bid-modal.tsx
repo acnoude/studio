@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,7 +32,6 @@ import { Gavel, Loader2, TriangleAlert } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import Link from "next/link";
 import { ScrollArea } from "./ui/scroll-area";
-import { useActionState } from "react";
 
 const BIDDER_INFO_KEY = "silentbid-bidder-info";
 
@@ -54,7 +53,8 @@ const bidFormSchema = z.object({
 type BidFormValues = z.infer<typeof bidFormSchema>;
 
 export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
-  const [state, formAction, isPending] = useActionState(placeBid, null);
+  const [state, setState] = useState<any>(null);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
   const dynamicResolver = useMemo(() => {
@@ -118,9 +118,20 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
       };
       
       form.reset(newDefaultValues);
+      setState(null);
     }
   }, [isOpen, item, form]);
 
+  const handleFormAction = (formData: FormData) => {
+    form.handleSubmit(() => {
+      // FormData needs 'amount' as a string
+      formData.set('amount', form.getValues('amount').toString());
+      startTransition(async () => {
+          const result = await placeBid(null, formData);
+          setState(result);
+      });
+    })();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -134,13 +145,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         <ScrollArea className="grid gap-4 px-6 overflow-y-auto">
           <Form {...form}>
             <form
-              action={(formData) => {
-                form.handleSubmit(() => {
-                  // FormData needs 'amount' as a string
-                  formData.set('amount', form.getValues('amount').toString());
-                  formAction(formData);
-                })();
-              }}
+              action={handleFormAction}
               className="space-y-4"
             >
               <input type="hidden" name="itemId" value={item.id} />
@@ -248,5 +253,3 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
     </Dialog>
   );
 }
-
-    

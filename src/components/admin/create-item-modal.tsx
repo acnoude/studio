@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -27,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { createItem } from "@/app/actions";
 import { Loader2, PlusCircle } from "lucide-react";
-import { useActionState } from "react";
 
 interface CreateItemModalProps {
   isOpen: boolean;
@@ -43,7 +43,8 @@ const formSchema = z.object({
 });
 
 export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) {
-  const [state, formAction, isPending] = useActionState(createItem, null);
+  const [state, setState] = useState<any>(null);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,12 +71,16 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
   useEffect(() => {
     if (isOpen) {
       form.reset();
+      setState(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleFormSubmit = (formData: FormData) => {
-    formAction(formData);
+    startTransition(async () => {
+        const result = await createItem(null, formData);
+        setState(result);
+    });
   }
 
   return (
@@ -96,7 +101,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
                 <FormItem>
                   <FormLabel>Item Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Vintage Leather Journal" {...field} />
+                    <Input placeholder="e.g., Vintage Leather Journal" {...field} name="name"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,6 +117,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
                     <Textarea
                       placeholder="Describe the item in detail..."
                       {...field}
+                      name="description"
                     />
                   </FormControl>
                   <FormMessage />
@@ -128,7 +134,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input type="number" className="pl-6" {...field} />
+                        <Input type="number" className="pl-6" {...field} name="startingBid" />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -144,7 +150,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input type="number" className="pl-6" {...field} />
+                        <Input type="number" className="pl-6" {...field} name="minIncrement"/>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -163,6 +169,7 @@ export function CreateItemModal({ isOpen, onOpenChange }: CreateItemModalProps) 
                       type="url"
                       placeholder="https://example.com/image.jpg"
                       {...field}
+                      name="imageUrl"
                     />
                   </FormControl>
                   <FormMessage />
