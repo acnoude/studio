@@ -22,10 +22,10 @@ export function ItemCard({ item }: ItemCardProps) {
 
   return (
     <>
-      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group border bg-card hover:border-primary/50 hover:shadow-lg">
+      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group border-0 shadow-none rounded-lg bg-card hover:shadow-xl">
         <CardContent className="p-0 flex flex-col flex-1">
           <Link href={`/item/${item.id}`} className="flex flex-col h-full">
-            <div className="aspect-[4/3] relative w-full overflow-hidden">
+            <div className="aspect-video relative w-full overflow-hidden rounded-t-lg">
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
@@ -36,9 +36,9 @@ export function ItemCard({ item }: ItemCardProps) {
                 />
             </div>
             <div className="flex-1 flex flex-col p-4">
-              <h3 className="font-semibold text-lg md:text-xl mb-2 flex-1">{item.name}</h3>
+              <h3 className="font-semibold text-base md:text-lg mb-2 flex-1">{item.name}</h3>
               <p className="text-sm font-medium text-muted-foreground">Current Bid</p>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-xl md:text-2xl font-bold text-foreground">
                 ${item.currentBid.toLocaleString()}
               </p>
             </div>
@@ -54,24 +54,26 @@ export function ItemCard({ item }: ItemCardProps) {
           </Button>
         </CardFooter>
       </Card>
-      <BidModal
-        item={item}
-        isOpen={isBidModalOpen}
-        onOpenChange={setIsBidModalOpen}
-      />
+      {isBidModalOpen && (
+        <BidModal
+            item={item}
+            isOpen={isBidModalOpen}
+            onOpenChange={setIsBidModalOpen}
+        />
+      )}
     </>
   );
 }
 
 export function ItemCardSkeleton() {
   return (
-    <Card className="flex flex-col h-full overflow-hidden border bg-card">
+    <Card className="flex flex-col h-full overflow-hidden border-0 shadow-none rounded-lg">
       <CardContent className="p-0">
-        <Skeleton className="aspect-[4/3] w-full" />
-        <div className="p-4">
-            <Skeleton className="h-6 w-3/4 mb-2" />
-            <Skeleton className="h-4 w-1/2 mb-4" />
-            <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="aspect-video w-full" />
+        <div className="p-4 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-7 w-1/3" />
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
