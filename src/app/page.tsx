@@ -28,7 +28,7 @@ export default function Home() {
               Silent Auction
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Explore our curated collection of exclusive items. Place your bids and support a great cause.
+              Welcome to the Hispanic Heritage Silent Auction. We invite you to bid on our exclusive items and support a great cause.
             </p>
           </div>
           <ItemGrid />
