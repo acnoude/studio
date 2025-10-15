@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useActionState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,6 +32,7 @@ import { Gavel, Loader2, TriangleAlert } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import Link from "next/link";
 import { ScrollArea } from "./ui/scroll-area";
+import { useActionState } from "react";
 
 const BIDDER_INFO_KEY = "silentbid-bidder-info";
 
@@ -127,12 +128,21 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="font-headline text-2xl">Place Your Bid</DialogTitle>
           <DialogDescription>
-            You are bidding on: <span className="font-semibold">{item.name}</span>
+            You are bidding on: <span className="font-semibold text-primary">{item.name}</span>
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="grid gap-4 px-6 overflow-y-auto">
           <Form {...form}>
-            <form action={formAction} className="space-y-4">
+            <form
+              action={(formData) => {
+                form.handleSubmit(() => {
+                  // FormData needs 'amount' as a string
+                  formData.set('amount', form.getValues('amount').toString());
+                  formAction(formData);
+                })();
+              }}
+              className="space-y-4"
+            >
               <input type="hidden" name="itemId" value={item.id} />
               
               <div className="text-center bg-muted/50 p-4 rounded-md">
@@ -194,7 +204,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
                 control={form.control}
                 name="terms"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
                     <FormControl>
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} name="terms" />
                     </FormControl>
@@ -208,7 +218,7 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
                       </FormLabel>
                       <ScrollArea className="h-24 w-full pr-4">
                         <p className="text-xs text-muted-foreground">
-                          By placing this bid, you are entering into a binding contract. If you are the winning bidder, you are obligated to purchase the item at the price of your winning bid. A valid payment method is required to place a bid. All sales are final. Items are sold as-is.
+                          By placing this bid, you are entering into a binding contract. If you are the winning bidder, you are obligated to purchase the item at the price of your winning bid. All sales are final. Items are sold as-is.
                         </p>
                       </ScrollArea>
                       <FormMessage />
@@ -238,3 +248,5 @@ export function BidModal({ item, isOpen, onOpenChange }: BidModalProps) {
     </Dialog>
   );
 }
+
+    

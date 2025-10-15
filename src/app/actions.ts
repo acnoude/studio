@@ -11,7 +11,7 @@ import { FieldValue } from "firebase-admin/firestore";
 const bidSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
-  amount: z.number().positive("Bid amount must be positive."),
+  amount: z.coerce.number().positive("Bid amount must be positive."),
   itemId: z.string(),
   terms: z.boolean().refine(val => val === true, {
     message: "You must agree to the terms and conditions.",
@@ -40,55 +40,54 @@ export async function placeBid(
     const { name, email, amount, itemId } = parsedBid.data;
 
     const itemRef = adminDb.doc(`items/${itemId}`);
-    const itemDoc = await itemRef.get();
-
-    if (!itemDoc.exists) {
-      return { message: `Item with ID "${itemId}" not found.`, status: "error" };
-    }
-
-    const item = itemDoc.data() as AuctionItem;
-
-    if (amount <= item.currentBid) {
-      return { message: "Your bid must be higher than the current bid.", status: "error" };
-    }
-
-    const fraudCheckResult = await validateBidForFraud({
-        bidAmount: amount,
-        userEmail: email,
-        userName: name,
-        itemDescription: item.description,
-        currentBid: item.currentBid,
-    });
-
-    if (fraudCheckResult.isFraudulent) {
-        return {
-            message: `Bid flagged as potentially fraudulent: ${fraudCheckResult.reason}`,
-            status: "error",
-        };
-    }
     
-    const batch = adminDb.batch();
+    const item = await adminDb.runTransaction(async (transaction) => {
+        const itemDoc = await transaction.get(itemRef);
+        if (!itemDoc.exists) {
+            throw new Error(`Item with ID "${itemId}" not found.`);
+        }
 
-    // Update the main item document
-    batch.update(itemRef, {
-      currentBid: amount,
-      highestBidderName: name,
-      highestBidderEmail: email,
+        const currentItem = itemDoc.data() as AuctionItem;
+
+        if (amount <= currentItem.currentBid) {
+            throw new Error("Your bid must be higher than the current bid.");
+        }
+        
+        const fraudCheckResult = await validateBidForFraud({
+            bidAmount: amount,
+            userEmail: email,
+            userName: name,
+            itemDescription: currentItem.description,
+            currentBid: currentItem.currentBid,
+        });
+
+        if (fraudCheckResult.isFraudulent) {
+            throw new Error(`Bid flagged as potentially fraudulent: ${fraudCheckResult.reason}`);
+        }
+        
+        // Update the main item document within the transaction
+        transaction.update(itemRef, {
+          currentBid: amount,
+          highestBidderName: name,
+          highestBidderEmail: email,
+        });
+
+        // Add a record to the bids subcollection (can't use batch in transaction)
+        const bidRef = itemRef.collection('bids').doc();
+        transaction.set(bidRef, {
+            name,
+            email,
+            amount,
+            createdAt: FieldValue.serverTimestamp(),
+            itemId,
+        });
+
+        return currentItem;
     });
 
-    // Add a record to the bids subcollection
-    const bidRef = itemRef.collection('bids').doc();
-    batch.set(bidRef, {
-        name,
-        email,
-        amount,
-        createdAt: FieldValue.serverTimestamp(),
-        itemId,
-    });
-
-    await batch.commit();
 
     revalidatePath("/");
+    revalidatePath(`/item/${itemId}`);
     revalidatePath("/admin");
     revalidatePath("/leaderboard");
 
@@ -220,3 +219,5 @@ export async function exportWinners() {
         return { message: `Failed to export winners: ${errorMessage}`, status: 'error', csv: '' };
     }
 }
+
+    
