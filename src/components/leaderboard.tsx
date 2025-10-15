@@ -81,7 +81,6 @@ export function Leaderboard() {
               <TableRow>
                 <TableHead className="w-16 text-center">Rank</TableHead>
                 <TableHead>Item</TableHead>
-                <TableHead>Highest Bidder</TableHead>
                 <TableHead className="text-right">Current Bid</TableHead>
               </TableRow>
             </TableHeader>
@@ -90,9 +89,6 @@ export function Leaderboard() {
                 <TableRow key={item.id}>
                   <TableCell className="text-center text-lg font-bold text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.highestBidderName || 'No bids yet'}
-                  </TableCell>
                   <TableCell className="text-right font-bold text-lg text-primary font-mono">
                     ${item.currentBid.toLocaleString()}
                   </TableCell>
