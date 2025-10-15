@@ -7,40 +7,6 @@ import { adminDb } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
 import { FieldValue } from "firebase-admin/firestore";
-import Stripe from "stripe";
-
-// Initialize Stripe with the secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-
-export async function createSetupIntent(email: string) {
-    try {
-        // Check if a customer with this email already exists
-        const customers = await stripe.customers.list({ email: email, limit: 1 });
-        let customer;
-        if (customers.data.length > 0) {
-            customer = customers.data[0];
-        } else {
-            // Create a new customer if one doesn't exist
-            customer = await stripe.customers.create({ email });
-        }
-
-        // Create a SetupIntent to save a card for future use
-        const setupIntent = await stripe.setupIntents.create({
-            customer: customer.id,
-            payment_method_types: ["card"],
-        });
-
-        return {
-            clientSecret: setupIntent.client_secret,
-            customerId: customer.id
-        };
-    } catch (error) {
-        console.error("[STRIPE_ERROR] createSetupIntent:", error);
-        const errorMessage = error instanceof Error ? error.message : "An unknown Stripe error occurred.";
-        return { error: errorMessage };
-    }
-}
-
 
 const bidSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -49,8 +15,7 @@ const bidSchema = z.object({
   itemId: z.string(),
   terms: z.boolean().refine(val => val === true, {
     message: "You must agree to the terms and conditions.",
-  }),
-  stripeCustomerId: z.string().optional(),
+  })
 });
 
 export async function placeBid(
@@ -223,7 +188,7 @@ export async function toggleGalaStatus(active: boolean) {
         return { message: `Gala has been ${status}. All items are now ${active ? 'active' : 'inactive'}.`, status: 'success' };
     } catch(error) {
         console.error('[SERVER_ACTION_ERROR] toggleGalaStatus:', error);
-        const errorMessage = error instanceof Error ? e.message : "Failed to update gala status.";
+        const errorMessage = error instanceof Error ? error.message : "Failed to update gala status.";
         return { message: `Failed to update gala status: ${errorMessage}`, status: 'error' };
     }
 }
