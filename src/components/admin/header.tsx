@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AdminHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,6 +36,7 @@ export function AdminHeader() {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -86,32 +88,36 @@ export function AdminHeader() {
   return (
     <>
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={() => handleToggleGala(true)} disabled={isToggling}>
-          {isToggling ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <Play className="mr-2 h-4 w-4" /> Start Gala
-            </>
-          )}
-        </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => handleToggleGala(false)}
-          disabled={isToggling}
-        >
-          {isToggling ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <Square className="mr-2 h-4 w-4" /> Stop Gala
-            </>
-          )}
-        </Button>
-        <Button size="sm" onClick={() => setIsModalOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Create Item
-        </Button>
+        {!isMobile && (
+          <>
+            <Button size="sm" onClick={() => handleToggleGala(true)} disabled={isToggling}>
+              {isToggling ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" /> Start Gala
+                </>
+              )}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => handleToggleGala(false)}
+              disabled={isToggling}
+            >
+              {isToggling ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Square className="mr-2 h-4 w-4" /> Stop Gala
+                </>
+              )}
+            </Button>
+            <Button size="sm" onClick={() => setIsModalOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Create Item
+            </Button>
+          </>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -125,6 +131,24 @@ export function AdminHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {isMobile && (
+              <>
+                <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  <span>Create Item</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleToggleGala(true)} disabled={isToggling}>
+                  {isToggling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                  <span>Start Gala</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleToggleGala(false)} disabled={isToggling}>
+                  {isToggling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Square className="mr-2 h-4 w-4 text-destructive" />}
+                  <span className="text-destructive">Stop Gala</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
               {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
               Export Winners

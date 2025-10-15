@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -31,11 +32,12 @@ import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { toggleItemStatus } from "@/app/actions";
-import { ArrowUpDown, Users, QrCode } from "lucide-react";
+import { ArrowUpDown, Users, QrCode, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { QrCodeModal } from "./qr-code-modal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BidHistoryModal } from "./bid-history-modal";
+import { Skeleton } from "../ui/skeleton";
 
 export function AdminItemsTable() {
   const [items, setItems] = React.useState<AuctionItem[]>([]);
@@ -193,10 +195,19 @@ export function AdminItemsTable() {
     state: {
       sorting,
     },
+    // Hides columns on mobile
+    columnVisibility: isMobile ? {
+      currentBid: false,
+      highestBidderName: false,
+    } : {},
   });
 
   if (loading) {
-    return <div>Loading items...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
   
   if (isMobile) {
@@ -205,24 +216,51 @@ export function AdminItemsTable() {
             {table.getRowModel().rows.map(row => (
                 <Card key={row.id}>
                     <CardHeader>
-                        {flexRender(row.getVisibleCells()[0].column.columnDef.cell, row.getVisibleCells()[0].getContext())}
+                        {/* Manually render the 'name' cell */}
+                        {flexRender(row.getVisibleCells().find(cell => cell.column.id === 'name')?.column.columnDef.cell, row.getVisibleCells().find(cell => cell.column.id === 'name')?.getContext())}
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 text-sm">
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Current Bid</p>
-                            {flexRender(row.getVisibleCells()[1].column.columnDef.cell, row.getVisibleCells()[1].getContext())}
+                            <p className="font-medium text-muted-foreground">Current Bid</p>
+                            <p className="font-mono text-lg">${row.original.currentBid.toLocaleString()}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Highest Bidder</p>
-                            {flexRender(row.getVisibleCells()[2].column.columnDef.cell, row.getVisibleCells()[2].getContext())}
+                            <p className="font-medium text-muted-foreground">Highest Bidder</p>
+                            {row.original.highestBidderName ? (
+                              <div>
+                                <p>{row.original.highestBidderName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {row.original.highestBidderEmail}
+                                </p>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">No bids yet</span>
+                            )}
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between">
-                       {flexRender(row.getVisibleCells()[3].column.columnDef.cell, row.getVisibleCells()[3].getContext())}
-                       {flexRender(row.getVisibleCells()[4].column.columnDef.cell, row.getVisibleCells()[4].getContext())}
+                    <CardFooter className="flex justify-between items-center">
+                       {flexRender(row.getVisibleCells().find(c => c.column.id === 'active')?.column.columnDef.cell, row.getVisibleCells().find(c => c.column.id === 'active')?.getContext())}
+                       {flexRender(row.getVisibleCells().find(c => c.column.id === 'actions')?.column.columnDef.cell, row.getVisibleCells().find(c => c.column.id === 'actions')?.getContext())}
                     </CardFooter>
                 </Card>
             ))}
+            {table.getRowModel().rows.length === 0 && (
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  No items found.
+                </CardContent>
+              </Card>
+            )}
+             <QrCodeModal
+              item={selectedItemForQr}
+              isOpen={!!selectedItemForQr}
+              onOpenChange={() => setSelectedItemForQr(null)}
+            />
+            <BidHistoryModal
+              item={selectedItemForHistory}
+              isOpen={!!selectedItemForHistory}
+              onOpenChange={() => setSelectedItemForHistory(null)}
+            />
         </div>
     )
   }
