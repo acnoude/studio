@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ItemGrid } from "@/components/item-grid";
 import { Logo } from "@/components/logo";
-import { BarChart3 } from "lucide-react";
 
 export default function Home() {
   return (
@@ -25,7 +24,7 @@ export default function Home() {
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 md:px-6 md:py-12">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 font-headline">
               Silent Auction
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">

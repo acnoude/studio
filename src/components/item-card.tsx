@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { AuctionItem } from "@/lib/types";
 import { BidModal } from "@/components/bid-modal";
-import { Gavel } from "lucide-react";
 
 interface ItemCardProps {
   item: AuctionItem;
@@ -23,10 +22,10 @@ export function ItemCard({ item }: ItemCardProps) {
 
   return (
     <>
-      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group border-0 shadow-none rounded-2xl bg-card/50 hover:bg-card">
-        <CardContent className="p-4 flex flex-col flex-1">
+      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group border bg-card hover:border-primary/50 hover:shadow-lg">
+        <CardContent className="p-0 flex flex-col flex-1">
           <Link href={`/item/${item.id}`} className="flex flex-col h-full">
-            <div className="aspect-[4/3] relative w-full overflow-hidden rounded-xl mb-4">
+            <div className="aspect-[4/3] relative w-full overflow-hidden">
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
@@ -36,10 +35,10 @@ export function ItemCard({ item }: ItemCardProps) {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
             </div>
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col p-4">
               <h3 className="font-semibold text-lg md:text-xl mb-2 flex-1">{item.name}</h3>
               <p className="text-sm font-medium text-muted-foreground">Current Bid</p>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl font-bold text-primary">
                 ${item.currentBid.toLocaleString()}
               </p>
             </div>
@@ -48,7 +47,7 @@ export function ItemCard({ item }: ItemCardProps) {
         <CardFooter className="p-4 pt-0">
           <Button
               className="w-full"
-              variant="secondary"
+              variant="default"
               onClick={() => setIsBidModalOpen(true)}
           >
               Place Bid
@@ -66,12 +65,14 @@ export function ItemCard({ item }: ItemCardProps) {
 
 export function ItemCardSkeleton() {
   return (
-    <Card className="flex flex-col h-full border-0 shadow-none rounded-2xl bg-card/50">
-      <CardContent className="p-4">
-        <Skeleton className="aspect-[4/3] w-full rounded-xl mb-4" />
-        <Skeleton className="h-6 w-3/4 mb-2" />
-        <Skeleton className="h-4 w-1/2 mb-2" />
-        <Skeleton className="h-8 w-1/3" />
+    <Card className="flex flex-col h-full overflow-hidden border bg-card">
+      <CardContent className="p-0">
+        <Skeleton className="aspect-[4/3] w-full" />
+        <div className="p-4">
+            <Skeleton className="h-6 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2 mb-4" />
+            <Skeleton className="h-8 w-1/3" />
+        </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Skeleton className="h-10 w-full" />
