@@ -3,8 +3,9 @@ import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
-import * as serviceAccount from "../../../serviceAccountKey.json";
 import "server-only";
+
+const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT!)
 
 const appName = 'firebase-admin-app-silentbid';
 let adminApp: App;

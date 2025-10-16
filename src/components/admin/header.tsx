@@ -34,7 +34,7 @@ export function AdminHeader() {
   const [isToggling, setIsToggling] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
   const router = useRouter();
   const isMobile = useIsMobile();
 
@@ -45,7 +45,8 @@ export function AdminHeader() {
 
   const handleToggleGala = async (active: boolean) => {
     setIsToggling(true);
-    const result = await toggleGalaStatus(active);
+    const token = await getToken();
+    const result = await toggleGalaStatus(active, token);
     if (result.status === "success") {
       toast({ title: "Success", description: result.message });
     } else {
@@ -60,7 +61,8 @@ export function AdminHeader() {
   
   const handleExport = async () => {
     setIsExporting(true);
-    const result = await exportWinners();
+    const token = await getToken();
+    const result = await exportWinners(token);
     if (result.status === 'success' && result.csv) {
         const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');

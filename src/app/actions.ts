@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { adminDb } from "@/lib/firebase/server";
+import { adminDb, adminAuth } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
 import { FieldValue } from "firebase-admin/firestore";
@@ -17,6 +17,17 @@ const bidSchema = z.object({
     message: "You must agree to the terms and conditions.",
   })
 });
+
+async function verifyAuth(token: string | null) {
+  if (!token) {
+    throw new Error("Authentication token not provided.");
+  }
+  try {
+    await adminAuth.verifyIdToken(token);
+  } catch (error) {
+    throw new Error("Invalid authentication token.");
+  }
+}
 
 export async function placeBid(
   prevState: any,
@@ -105,6 +116,7 @@ const itemSchema = z.object({
     startingBid: z.number().min(0, 'Starting bid must be non-negative'),
     minIncrement: z.number().positive('Minimum increment must be a positive number'),
     imageUrl: z.string().url('A valid image URL is required'),
+    token: z.string().nullable(),
 });
 
 
@@ -116,6 +128,7 @@ export async function createItem(prevState: any, formData: FormData) {
             startingBid: Number(formData.get('startingBid')),
             minIncrement: Number(formData.get('minIncrement')),
             imageUrl: formData.get('imageUrl'),
+            token: formData.get('token'),
         }
 
         const parsed = itemSchema.safeParse(rawFormData);
@@ -123,7 +136,8 @@ export async function createItem(prevState: any, formData: FormData) {
             return { message: 'Invalid data', errors: parsed.error.flatten().fieldErrors };
         }
 
-        const { name, description, startingBid, minIncrement, imageUrl } = parsed.data;
+        const { name, description, startingBid, minIncrement, imageUrl, token } = parsed.data;
+        await verifyAuth(token);
 
         const itemsCollectionRef = adminDb.collection("items");
         
@@ -152,8 +166,9 @@ export async function createItem(prevState: any, formData: FormData) {
 }
 
 
-export async function toggleItemStatus(id: string, active: boolean) {
+export async function toggleItemStatus(id: string, active: boolean, token: string | null) {
     try {
+        await verifyAuth(token);
         const itemRef = adminDb.doc(`items/${id}`);
         await itemRef.update({ active: active });
         revalidatePath('/admin');
@@ -167,8 +182,9 @@ export async function toggleItemStatus(id: string, active: boolean) {
     }
 }
 
-export async function toggleGalaStatus(active: boolean) {
+export async function toggleGalaStatus(active: boolean, token: string | null) {
     try {
+        await verifyAuth(token);
         const itemsCollection = adminDb.collection('items');
         const querySnapshot = await itemsCollection.get();
         const batch = adminDb.batch();
@@ -192,8 +208,9 @@ export async function toggleGalaStatus(active: boolean) {
     }
 }
 
-export async function exportWinners() {
+export async function exportWinners(token: string | null) {
     try {
+        await verifyAuth(token);
         const itemsSnapshot = await adminDb.collection('items')
             .where('highestBidderEmail', '!=', null)
             .get();

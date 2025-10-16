@@ -8,12 +8,12 @@ import { getStorage, FirebaseStorage } from "firebase/storage";
 import { getFunctions, Functions } from "firebase/functions";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCuFhTgLHpnkPB8liRadG2IFbDyqaMFXKc",
+  authDomain: "hhsilentbidding.firebaseapp.com",
+  projectId: "hhsilentbidding",
+  storageBucket: "hhsilentbidding.firebasestorage.app",
+  messagingSenderId: "316633780557",
+  appId: "1:316633780557:web:329a39ab59c3a772e26704",
 };
 
 // Client-side Firebase
