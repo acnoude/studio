@@ -1,26 +1,64 @@
 
 import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, cert, type App } from 'firebase-admin/app';
-import { getAuth as getAdminAuth } from "firebase-admin/auth";
-import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
-import { getStorage as getAdminStorage } from "firebase-admin/storage";
+import { getAuth as getAdminAuth, type Auth } from "firebase-admin/auth";
+import { getFirestore as getAdminFirestore, type Firestore } from "firebase-admin/firestore";
+import { getStorage as getAdminStorage, type Storage } from "firebase-admin/storage";
 import "server-only";
 
-const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT!)
+// This is a singleton pattern to ensure we only initialize the app once.
+let adminApp: App | null = null;
 
-const appName = 'firebase-admin-app-silentbid';
-let adminApp: App;
+function initializeFirebaseAdmin() {
+    if (adminApp) {
+        return adminApp;
+    }
 
-if (!getAdminApps().some(app => app.name === appName)) {
-  adminApp = initializeAdminApp({
-    credential: cert(serviceAccount as any),
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  }, appName);
-} else {
-  adminApp = getAdminApp(appName);
+    const appName = 'firebase-admin-app-silentbid';
+    const existingApp = getAdminApps().find(app => app.name === appName);
+    if (existingApp) {
+        adminApp = existingApp;
+        return adminApp;
+    }
+
+    const serviceAccountEncoded = process.env.SERVICE_ACCOUNT_BASE64;
+    if (!serviceAccountEncoded) {
+        throw new Error('The SERVICE_ACCOUNT_BASE64 environment variable is not set.');
+    }
+
+    try {
+        const serviceAccountJson = Buffer.from(serviceAccountEncoded, 'base64').toString('utf8');
+        if (!serviceAccountJson) {
+            throw new Error("Base64 decoded service account JSON is empty.");
+        }
+        const serviceAccount = JSON.parse(serviceAccountJson);
+
+        adminApp = initializeAdminApp({
+            credential: cert(serviceAccount as any),
+            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        }, appName);
+
+        return adminApp;
+
+    } catch (e: any) {
+        throw new Error(`Failed to initialize Firebase Admin SDK. Error: ${e.message}`);
+    }
 }
 
-const adminDb = getAdminFirestore(adminApp, "hhsilentbid");
-const adminAuth = getAdminAuth(adminApp);
-const adminStorage = getAdminStorage(adminApp);
+// Instead of exporting the instances directly, we export getter functions.
+// This defers the initialization until the function is called within a server-side context.
 
-export { adminApp, adminAuth, adminDb, adminStorage };
+export function getAdminDb(): Firestore {
+    const app = initializeFirebaseAdmin();
+    // The "hhsilentbid" is the database ID for the named database.
+    return getAdminFirestore(app, "hhsilentbid");
+}
+
+export function getAdminAuth(): Auth {
+    const app = initializeFirebaseAdmin();
+    return getAdminAuth(app);
+}
+
+export function getAdminStorage(): Storage {
+    const app = initializeFirebaseAdmin();
+    return getAdminStorage(app);
+}

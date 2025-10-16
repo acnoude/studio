@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { adminDb, adminAuth } from "@/lib/firebase/server";
+import { getAdminDb, getAdminAuth } from "@/lib/firebase/server";
 import { validateBidForFraud } from "@/ai/flows/validate-bids-for-fraud";
 import type { AuctionItem } from "@/lib/types";
 import { FieldValue } from "firebase-admin/firestore";
@@ -19,6 +19,7 @@ const bidSchema = z.object({
 });
 
 async function verifyAuth(token: string | null) {
+  const adminAuth = getAdminAuth();
   if (!token) {
     throw new Error("Authentication token not provided.");
   }
@@ -34,6 +35,7 @@ export async function placeBid(
   formData: FormData
 ) {
   try {
+    const adminDb = getAdminDb();
     const rawFormData = Object.fromEntries(formData.entries());
     const parsedBid = bidSchema.safeParse({
         ...rawFormData,
@@ -122,6 +124,7 @@ const itemSchema = z.object({
 
 export async function createItem(prevState: any, formData: FormData) {
     try {
+        const adminDb = getAdminDb();
         const rawFormData = {
             name: formData.get('name'),
             description: formData.get('description'),
@@ -168,6 +171,7 @@ export async function createItem(prevState: any, formData: FormData) {
 
 export async function toggleItemStatus(id: string, active: boolean, token: string | null) {
     try {
+        const adminDb = getAdminDb();
         await verifyAuth(token);
         const itemRef = adminDb.doc(`items/${id}`);
         await itemRef.update({ active: active });
@@ -184,6 +188,7 @@ export async function toggleItemStatus(id: string, active: boolean, token: strin
 
 export async function toggleGalaStatus(active: boolean, token: string | null) {
     try {
+        const adminDb = getAdminDb();
         await verifyAuth(token);
         const itemsCollection = adminDb.collection('items');
         const querySnapshot = await itemsCollection.get();
@@ -210,6 +215,7 @@ export async function toggleGalaStatus(active: boolean, token: string | null) {
 
 export async function exportWinners(token: string | null) {
     try {
+        const adminDb = getAdminDb();
         await verifyAuth(token);
         const itemsSnapshot = await adminDb.collection('items')
             .where('highestBidderEmail', '!=', null)
@@ -236,5 +242,3 @@ export async function exportWinners(token: string | null) {
         return { message: `Failed to export winners: ${errorMessage}`, status: 'error', csv: '' };
     }
 }
-
-    
