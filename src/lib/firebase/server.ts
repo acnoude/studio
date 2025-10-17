@@ -1,8 +1,8 @@
 
 import { initializeApp as initializeAdminApp, getApps as getAdminApps, getApp as getAdminApp, cert, type App } from 'firebase-admin/app';
-import { getAuth as getAdminAuth, type Auth } from "firebase-admin/auth";
-import { getFirestore as getAdminFirestore, type Firestore } from "firebase-admin/firestore";
-import { getStorage as getAdminStorage, type Storage } from "firebase-admin/storage";
+import { getAuth, type Auth } from "firebase-admin/auth";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { getStorage, type Storage } from "firebase-admin/storage";
 import "server-only";
 
 // This is a singleton pattern to ensure we only initialize the app once.
@@ -50,15 +50,15 @@ function initializeFirebaseAdmin() {
 export function getAdminDb(): Firestore {
     const app = initializeFirebaseAdmin();
     // The "hhsilentbid" is the database ID for the named database.
-    return getAdminFirestore(app, "hhsilentbid");
+    return getFirestore(app, "hhsilentbid");
 }
 
 export function getAdminAuth(): Auth {
     const app = initializeFirebaseAdmin();
-    return getAdminAuth(app);
+    return getAuth(app);
 }
 
 export function getAdminStorage(): Storage {
     const app = initializeFirebaseAdmin();
-    return getAdminStorage(app);
+    return getStorage(app);
 }
